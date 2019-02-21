@@ -1,4 +1,6 @@
-I2input = genI2input;
+nFreq = 36;
+
+I2input = genI2input(nFreq);
 
 netcon=eye(N_pre,N_post)
 

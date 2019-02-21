@@ -31,8 +31,9 @@ end
 % model structure
 s=[];
 
+nLocs = 5;
 nFreqs = 36;
-nCells = 5*nFreqs;
+nCells = nLocs*nFreqs;
 
 noise = 0.01; % low noise
 
@@ -84,8 +85,13 @@ s.mechanisms(1).equations=synDoubleExp;
 % build I->R netcon matrix
 % netcons are [N_pre,N_post]
 
-irNetcon = ones(nCells)-diag(ones(1,nCells));
-i2iNetcon = diag(ones(1,nCells));
+Locs = 1:nLocs;
+freqs = 1:nFreqs;
+
+
+irNetcon = ones(nLocs)-diag(ones(1,nLocs));
+irNetcon2 = repmat(irNetcon,1,1,nFreq);
+i2iNetcon = diag(ones(1,nLocs));
 %% mechanisms
 s.connections(1).direction='I->I';
 s.connections(1).mechanism_list='IC';
