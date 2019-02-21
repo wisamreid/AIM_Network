@@ -1,8 +1,6 @@
 % IC Input
 
-freqInd = 1;
-
-ICinput = genICinput(freqInd, tauR, tauD, dt);
+ICinput = genICinput(tauR, tauD, dt);
 
 g_postIC = 0.1
 E_exc = 0
