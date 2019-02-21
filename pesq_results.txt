@@ -1,0 +1,8 @@
+REFERENCE	 DEGRADED	 PESQMOS	 MOSLQO	 SAMPLE_FREQ	 MODE
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 1.834	 1.511	 16000	nb
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 1.630	 1.389	 16000	nb
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 0.877	 1.135	 16000	nb
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 0.631	 1.094	 16000	nb
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 0.910	 1.141	 16000	nb
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 1.708	 1.432	 16000	nb
+eval_data\IC_debug\TM_00_90_set_01_target.wav	 temp.wav	 1.662	 1.406	 16000	nb

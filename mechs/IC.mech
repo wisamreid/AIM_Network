@@ -1,0 +1,27 @@
+% IC Input
+
+freqInd = 1;
+
+ICinput = genICinput(freqInd, tauR, tauD, dt);
+
+g_postIC = 0.1
+E_exc = 0
+tauR = 1
+tauD = 3
+
+% f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)
+
+netcon=eye(N_pre,N_post)
+
+%iIC(X,t) = g_postIC .* sum( f( ICinput(max(1,round(t/dt)), :) ) * netcon ).*(E_exc - X);
+%iIC(X,t) = g_postIC .* f(ICinput(max(1,round(t/dt)), :)) * netcon ).*(E_exc - X);
+%iIC(X,t) = g_postIC .* f( ICinput(round(t/dt),:) ) * netcon .* (E_exc - X);
+%iIC(X,t) = g_postIC .* ICinput(round(t/dt),:) * netcon .* (E_exc - X);
+
+iIC(X,t) = g_postIC .* ICinput(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc);
+
+% monitor functions
+
+monitor iIC
+
+@isyn += iIC(X,t)

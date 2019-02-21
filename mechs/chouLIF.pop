@@ -1,0 +1,32 @@
+chouLIF:
+% Erik's Implementation
+%dV/dt = ( g_leak*(E_leak - V) + g_ad*(E_k - V) + @isyn + Itonic + noise*randn(1,N_pop)/dt )/C;
+
+dV/dt = ( g_leak*(E_leak - V) + g_ad*(E_k - V) - @isyn + Itonic + noise*randn(1,N_pop)/dt )/C;
+
+
+
+% use this to have no spikes:
+% if(V >= V_thresh)(V = V_reset)
+
+% use this to insert spikes:
+if(V >= V_spike-10)(V = V_reset)
+if(V >= V_thresh & V < V_spike-10)(V = V_spike)
+
+monitor V.spikes(V_thresh,1)
+
+% capacitance and leak resistance
+C = 0.5; % nF
+
+g_leak = 1/100; % uS = 1/R (1/Mohm)
+g_ad = 0; % uS
+
+E_leak = -60; % mV, equilibrium potential
+E_k = -70; % adaptation channel
+
+V_thresh = -40; % spike threshold mV
+V_spike = 50; % spike value mV
+V_reset = -50
+
+Itonic = 0
+noise = 0
