@@ -39,5 +39,6 @@ tau_rise = tau1*tau2/(tau1-tau2);
 b = ((tau2/tau1)^(tau_rise/tau1) - (tau2/tau1)^(tau_rise/tau2)^-1); % /tau2?
 epsc =  - b * ( exp(-t_vec/tau1) - exp(-t_vec/tau2) ); % - to make positive
 sigIn = conv2(sigIn,epsc','same');
+disp(size(sigIn))
 
 end

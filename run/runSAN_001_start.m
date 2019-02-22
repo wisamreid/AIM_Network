@@ -1,5 +1,10 @@
-% This file solves the full I, C, R model with IC input
-
+% This file solves the full I, C, R, I2 model with IC input
+% 
+% This file produces the exact same output as the initial implementation
+% (before combining frequency and location into one dimension). It's a good
+% starting point for further investigation.
+% Runtime for dsSimulate is ~30s (down from ~3 min in the previous 
+% implementation)
 
 
 %% solver params
@@ -19,9 +24,6 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's');
 end
 mkdir(fullfile(study_dir, 'solve'));
-
-spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\001 IC_spk 64Chan150-8000hz\TM at 0_90 -FreqGainNorm talker4\';
-
 copyfile( fullfile('eval_data', 'TM_00_90_set_01_SpkIC.mat'), fullfile(study_dir, 'solve', 'IC_spks.mat') );
 
 if ~exist('spk_IC','var')
@@ -34,7 +36,9 @@ end
 % model structure
 s=[];
 
-nCells = 5;
+nLocs = 5;
+nFreqs = 36;
+nCells = nLocs*nFreqs;
 
 noise = 0.01; % low noise
 
@@ -52,7 +56,7 @@ s.populations(2).parameters = {'noise',noise};
 
 s.populations(3).name='C';
 s.populations(3).equations = 'chouLIF';
-s.populations(3).size = 1;
+s.populations(3).size = nFreqs;
 s.populations(3).parameters = {'noise',noise};
 
 s.populations(4).name='st';
@@ -86,8 +90,17 @@ s.mechanisms(1).equations=synDoubleExp;
 % build I->R netcon matrix
 % netcons are [N_pre,N_post]
 
-irNetcon = ones(nCells)-diag(ones(1,nCells));
-i2iNetcon = diag(ones(1,nCells));
+irNetconSmall = ones(nLocs)-diag(ones(1,nLocs));
+irNetconCell = repmat({irNetconSmall},1,nFreqs);
+irNetconGroupByLoc = blkdiag(irNetconCell{:});
+irNetcon = regroup(irNetconGroupByLoc, [nFreqs,nLocs]);
+
+i2iNetconGroupByLoc = diag(ones(1,nCells));
+i2iNetcon = regroup(i2iNetconGroupByLoc, [nFreqs,nLocs]);
+
+rcNetconCell = repmat({ones(5,1)},1,nFreqs);
+rcNetconGroupByLoc = blkdiag(rcNetconCell{:});
+rcNetcon = regroup(rcNetconGroupByLoc, [nFreqs,nLocs]);
 %% mechanisms
 s.connections(1).direction='I->I';
 s.connections(1).mechanism_list='IC';
@@ -101,14 +114,12 @@ s.connections(end).parameters={'g_postIC',0.02};
 
 s.connections(end+1).direction='I->R';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.15, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
 %reversal potential ESYN = inhibitory
-expName = 'I_R_gSYN_0.15\';
-
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',2, 'netcon','ones(N_pre,N_post)'}; 
+s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',2, 'netcon',rcNetcon}; 
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
@@ -121,9 +132,7 @@ s.connections(end).parameters={'gSYN',.09, 'tauR',0.4, 'tauD',10, 'netcon',i2iNe
 
 %% vary
 vary = {
-  '(I->I,R->R)', 'freqInd', 1:36;
-%   'I-R','gSYN',0.1:0.05:0.5;
-%   '(I->I,R->R)', 'freqInd', 1;
+    'I->R', 'gSYN', 0.1;  
 };
 nVary = calcNumVary(vary);
 parfor_flag = double(nVary > 1); % use parfor if multiple sims
@@ -132,7 +141,7 @@ parfor_flag = double(nVary > 1); % use parfor if multiple sims
 %% simulate
 tic
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
-  'downsample_factor',1/dt, 'save_data_flag',1, 'save_results_flag',1,...
+  'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
   'study_dir',study_dir, 'debug_flag',1, 'vary',vary, 'verbose_flag',1,...
   'parfor_flag',parfor_flag);
 toc
@@ -146,54 +155,6 @@ for iData = 1:length(data)
   end
 end
 
-%% plot
-% dsPlot(data(1:5));
-% dsPlot(data(1:5), 'variable','C_V');
-% dsPlot(data(1), 'plot_type','raster');
-
-% %% firing rates
-% % calc fr
-% data2 = dsCalcFR(data, 'bin_size', 100, 'bin_shift',20); % 100ms bin, 20% shift
-% 
-% figure
-% 
-% % C firing rate
-% sp(1) = subplot(211);
-% if nVary == 1
-%   plot(data2.time_FR, data2.C_V_spikes_FR);
-%   xlabel('Time [ms]')
-%   ylabel('Firing Rate [Hz]')
-%   title('C Firing Rate')
-% else
-%   cFR = cat(2, data2.C_V_spikes_FR);
-%   
-%   % plot
-%   imagesc(data2(1).time_FR, [], cFR');
-% %   caxis([0 70])
-%   colorbar
-%   xlabel('Time [ms]')
-%   ylabel('Freqs')
-%   title('C Firing Rate')
-% end
-% 
-% % IC input
-% spatialChan = 5;
-% sp(2) = subplot(212);
-% freqInd = vary{strcmp(vary(:,2),'freqInd'), 3};
-% if nVary == 1
-%   icSpikes = logical(spk_IC(:,:,freqInd)'); % take all inputs for this freq
-% else
-%   icSpikes = logical(squeeze(spk_IC(:,spatialChan,:))'); % take only middle input for all freqs
-% end
-% plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'AxHandle',sp(2), 'Fs',spk_IC_fs);
-% title('IC Input')
-% ylabel('Freqs')
-% 
-% if nVary > 1
-%   colorbar
-% end
-% 
-% linkaxes(sp, 'x');
 
 %%
 temp = [data.R_V_spikes];
@@ -204,18 +165,18 @@ figure;
 IVspikes = logical([data.I_V_spikes])';
 RVspikes = logical([data.R_V_spikes])';
 I2Vspikes = logical([data.st_V_spikes])';
-idx = 1:5:nCells*36;
 for i = 1:5
+    idx = 1+36*(i-1):36*i;
     subplot(4,5,i)
-    plotSpikeRasterFs(I2Vspikes(idx+i-1,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+    plotSpikeRasterFs(I2Vspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
     xlim([0 2000])
     if i==1, ylabel('I2 spikes'); end
     subplot(4,5,i+5)
-    plotSpikeRasterFs(RVspikes(idx+i-1,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+    plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
     xlim([0 2000])
     if i==1, ylabel('R spikes'); end
     subplot(4,5,i+10)
-    plotSpikeRasterFs(IVspikes(idx+i-1,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+    plotSpikeRasterFs(IVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
     xlim([0 2000])
     if i==1, ylabel('I spikes'); end
     subplot(4,5,i+15)
@@ -224,7 +185,9 @@ for i = 1:5
     xlim([0 2000])
     if i==1, ylabel('IC spikes'); end
 end
-
+icSpikes = logical(data.C_V_spikes)'; 
+    plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
+    xlim([0 2000])
 %% Evaluate Output Intelligibilty
 addpath('eval_scripts')
 cSpikes = ([data.C_V_spikes])';
@@ -252,13 +215,4 @@ params.fs = fs;
 
 [out,rstim1,rstim2,rstim3] = recon_eval(data,targetLoc,targetSpatializedLoc,mixedLoc,params);
 
-%% save data
-dataDir = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\004 varyCortexParam\';
-dataLoc = [dataDir expName];
-if ~exist('dataLoc','dir')
-    mkdir(dataLoc);
-end
-audiowrite([dataLoc 'recon_filt.wav'],rstim1/max(abs(rstim1)),fs);
-audiowrite([dataLoc 'recon_env.wav'],rstim2/max(abs(rstim2)),fs);
-audiowrite([dataLoc 'recon_voc.wav'],rstim3/max(abs(rstim3)),fs);
 

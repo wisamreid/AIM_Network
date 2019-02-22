@@ -1,8 +1,12 @@
 function out = genI2input(nFreq)
-% input to I2 cells;
+% input to I2 cells; defaulted to be on
 %     1 = on, 0 = off
 % I2 input should have the format of time x freqInd x location
 % output: (time)x(nFreq*nLocs)
+%
+% @ Kenny Chou
+% Boston Univeristy, 2019
+
 
 % taps = size(fileData.spk_IC,1);
 taps = 76000;

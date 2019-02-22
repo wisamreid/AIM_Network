@@ -19,10 +19,16 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's');
 end
 mkdir(fullfile(study_dir, 'solve'));
-copyfile( fullfile('eval_data', 'TM_00_90_set_01_SpkIC.mat'), fullfile(study_dir, 'solve', 'IC_spks.mat') );
+
+spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\001 IC_spk 64Chan150-8000hz\TM at 0_90 -FreqGainNorm talker4\';
+spkList = ls([spkLoc '*IC.mat']);
+spkFile = spkList(1,:);
+spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
+copyfile( fullfile(spkLoc, spkFile), spkICCopy);
 
 if ~exist('spk_IC','var')
-    spk_IC = load(fullfile('eval_data', 'TM_00_90_set_01_SpkIC.mat'), 'spk_IC');
+    %spk_IC should have dimensions [time x freq chan x spatial chan]
+    spk_IC = load(fullfile(spkICCopy), 'spk_IC','fcoefs','cf');
     spk_IC = spk_IC.spk_IC;
     spk_IC_fs = 40e3;
     spk_IC_t = 1/spk_IC_fs:1/spk_IC_fs:size(spk_IC,1)/spk_IC_fs;
@@ -51,7 +57,7 @@ s.populations(2).parameters = {'noise',noise};
 
 s.populations(3).name='C';
 s.populations(3).equations = 'chouLIF';
-s.populations(3).size = 1;
+s.populations(3).size = nFreqs;
 s.populations(3).parameters = {'noise',noise};
 
 s.populations(4).name='st';
@@ -92,6 +98,10 @@ irNetcon = regroup(irNetconGroupByLoc, [nFreqs,nLocs]);
 
 i2iNetconGroupByLoc = diag(ones(1,nCells));
 i2iNetcon = regroup(i2iNetconGroupByLoc, [nFreqs,nLocs]);
+
+rcNetconCell = repmat({ones(5,1)},1,nFreqs);
+rcNetconGroupByLoc = blkdiag(rcNetconCell{:});
+rcNetcon = regroup(rcNetconGroupByLoc, [nFreqs,nLocs]);
 %% mechanisms
 s.connections(1).direction='I->I';
 s.connections(1).mechanism_list='IC';
@@ -110,7 +120,7 @@ s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',10, 'netcon',irNetc
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',2, 'netcon','ones(N_pre,N_post)'}; 
+s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',2, 'netcon',rcNetcon}; 
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
@@ -176,7 +186,9 @@ for i = 1:5
     xlim([0 2000])
     if i==1, ylabel('IC spikes'); end
 end
-
+icSpikes = logical(data.C_V_spikes)'; 
+    plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
+    xlim([0 2000])
 %% Evaluate Output Intelligibilty
 addpath('eval_scripts')
 cSpikes = ([data.C_V_spikes])';
