@@ -85,13 +85,13 @@ s.mechanisms(1).equations=synDoubleExp;
 % build I->R netcon matrix
 % netcons are [N_pre,N_post]
 
-Locs = 1:nLocs;
-freqs = 1:nFreqs;
+irNetconSmall = ones(nLocs)-diag(ones(1,nLocs));
+irNetconCell = repmat({irNetconSmall},1,nFreqs);
+irNetconGroupByLoc = blkdiag(irNetconCell{:});
+irNetcon = regroup(irNetconGroupByLoc, [nFreqs,nLocs]);
 
-
-irNetcon = ones(nLocs)-diag(ones(1,nLocs));
-irNetcon2 = repmat(irNetcon,1,1,nFreq);
-i2iNetcon = diag(ones(1,nLocs));
+i2iNetconGroupByLoc = diag(ones(1,nCells));
+i2iNetcon = regroup(i2iNetconGroupByLoc, [nFreqs,nLocs]);
 %% mechanisms
 s.connections(1).direction='I->I';
 s.connections(1).mechanism_list='IC';
@@ -132,7 +132,7 @@ parfor_flag = double(nVary > 1); % use parfor if multiple sims
 %% simulate
 tic
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
-  'downsample_factor',1/dt, 'save_data_flag',1, 'save_results_flag',1,...
+  'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
   'study_dir',study_dir, 'debug_flag',1, 'vary',vary, 'verbose_flag',1,...
   'parfor_flag',parfor_flag);
 toc
@@ -156,18 +156,18 @@ figure;
 IVspikes = logical([data.I_V_spikes])';
 RVspikes = logical([data.R_V_spikes])';
 I2Vspikes = logical([data.st_V_spikes])';
-idx = 1:5:nCells*36;
 for i = 1:5
+    idx = 1+36*(i-1):36*i;
     subplot(4,5,i)
-    plotSpikeRasterFs(I2Vspikes(idx+i-1,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+    plotSpikeRasterFs(I2Vspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
     xlim([0 2000])
     if i==1, ylabel('I2 spikes'); end
     subplot(4,5,i+5)
-    plotSpikeRasterFs(RVspikes(idx+i-1,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+    plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
     xlim([0 2000])
     if i==1, ylabel('R spikes'); end
     subplot(4,5,i+10)
-    plotSpikeRasterFs(IVspikes(idx+i-1,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+    plotSpikeRasterFs(IVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
     xlim([0 2000])
     if i==1, ylabel('I spikes'); end
     subplot(4,5,i+15)
