@@ -121,7 +121,7 @@ s.connections(end).parameters={'g_postIC',0.02};
 
 s.connections(end+1).direction='I->R';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.15, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
 %reversal potential ESYN = inhibitory
 
 s.connections(end+1).direction='R->C';
@@ -130,27 +130,28 @@ s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',2, 'netcon',rcNetco
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
-s.connections(end).parameters={'g_preI2',0.01,'nFreq',nFreqs}; % 100 hz spiking
+s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs}; % 100 hz spiking
 
 
 s.connections(end+1).direction='st->I';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',10, 'netcon',i2iNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.12, 'tauR',0.4, 'tauD',10, 'netcon',i2iNetcon, 'ESYN',-80}; 
 
 %% vary
 vary = {
-    'I->R', 'gSYN', 0.1;  
+    'I->R', 'gSYN', 0.12:0.01:0.17;  
 };
 nVary = calcNumVary(vary);
-parfor_flag = double(nVary > 1); % use parfor if multiple sims
+parfor_flag = 0; %double(nVary > 1); % use parfor if multiple sims
 
 
 %% simulate
 tic
+compile_flag = 1;
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
   'study_dir',study_dir, 'debug_flag',1, 'vary',vary, 'verbose_flag',1,...
-  'parfor_flag',parfor_flag);
+  'parfor_flag',parfor_flag,'compile_flag',compile_flag);
 toc
 
 %% insert spikes
@@ -164,38 +165,40 @@ end
 
 
 %%
-temp = [data.R_V_spikes];
+temp = [data(6).I_V_spikes];
 length(find(temp)) %number of spikes present
 
 %%
-figure;
-IVspikes = logical([data.I_V_spikes])';
-RVspikes = logical([data.R_V_spikes])';
-I2Vspikes = logical([data.st_V_spikes])';
-for i = 1:5
-    idx = 1+nFreqs*(i-1):nFreqs*i;
-    subplot(4,5,i)
-    plotSpikeRasterFs(I2Vspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
-    xlim([0 2000])
-    if i==1, ylabel('I2 spikes'); end
-    subplot(4,5,i+5)
-    plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
-    xlim([0 2000])
-    if i==1, ylabel('R spikes'); end
-    subplot(4,5,i+10)
-    plotSpikeRasterFs(IVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
-    xlim([0 2000])
-    if i==1, ylabel('I spikes'); end
-    subplot(4,5,i+15)
-    icSpikes = logical(squeeze(spk_IC(:,:,i))'); 
+for j = 1:length(data)
+    figure;
+    IVspikes = logical([data(j).I_V_spikes])';
+    RVspikes = logical([data(j).R_V_spikes])';
+    I2Vspikes = logical([data(j).st_V_spikes])';
+    for i = 1:5
+        idx = 1+nFreqs*(i-1):nFreqs*i;
+        subplot(4,5,i)
+        plotSpikeRasterFs(I2Vspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+        xlim([0 2000])
+        if i==1, ylabel('I2 spikes'); end
+        subplot(4,5,i+5)
+        plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+        xlim([0 2000])
+        if i==1, ylabel('R spikes'); end
+        subplot(4,5,i+10)
+        plotSpikeRasterFs(IVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+        xlim([0 2000])
+        if i==1, ylabel('I spikes'); end
+        subplot(4,5,i+15)
+        icSpikes = logical(squeeze(spk_IC(:,:,i))'); 
+        plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
+        xlim([0 2000])
+        if i==1, ylabel('IC spikes'); end
+    end
+    figure;
+    icSpikes = logical(data(j).C_V_spikes)'; 
     plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
-    xlim([0 2000])
-    if i==1, ylabel('IC spikes'); end
+    xlim([0 2000]); title('C spikes')
 end
-figure;
-icSpikes = logical(data.C_V_spikes)'; 
-plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
-xlim([0 2000]); title('C spikes')
 %% Evaluate Output Intelligibilty
 addpath('eval_scripts')
 cSpikes = ([data.C_V_spikes])';
@@ -212,6 +215,10 @@ targetLoc = 'eval_data\TM_00_90_set_01_target.wav';
 targetSpatializedLoc = 'eval_data\TM_00_90_set_01_target_conv.wav';
 mixedLoc = 'eval_data\TM_00_90_set_01_mixed.wav';
 
+tgt = audioread(targetLoc);
+targetFiltmono = ERBFilterBank(tgt,IC_info.fcoefs);
+figure;plot_db(targetFiltmono,90);
+
 fs = 40000;
 params.fcoefs = IC_info.fcoefs;
 params.cf = IC_info.cf;
@@ -220,7 +227,7 @@ params.fs = fs;
 % params.low_freq = 200; %min freq of the filter
 % params.high_freq = 8000;
 % params.numChannel = length(IC_info.cf);
-
-[out,rstim1,rstim2,rstim3] = recon_eval(data,targetLoc,targetSpatializedLoc,mixedLoc,params);
-
+for j = 1:length(data)
+    [out(j,:),rstim1,rstim2,rstim3] = recon_eval(data(j),targetLoc,targetSpatializedLoc,mixedLoc,params);
+end
 

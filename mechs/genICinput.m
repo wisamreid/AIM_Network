@@ -10,11 +10,7 @@ function sigIn = genICinput(tauR, tauD, dt)
 %
 % TODO: allow resampling of spk_IC to different dt
 
-try
-  fileData = load('IC_spks.mat','spk_IC');
-catch
-  fileData = load(fullfile('..', 'IC_spks.mat'),'spk_IC');
-end
+fileData = load('IC_spks.mat','spk_IC');
 
 % IC data should have the format of time x freqInd x location
 % Permute data if this is misshaped.

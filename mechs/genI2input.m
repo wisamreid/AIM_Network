@@ -15,6 +15,7 @@ fs = 40000;
 nLocs = 5;
 
 %define when input current to I2 will be turned off and on
+chanSwitch = cell(1,5);
 chanSwitch{1} = []; %ms
 chanSwitch{2} = [];
 chanSwitch{3} = [0];
