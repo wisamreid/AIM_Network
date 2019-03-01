@@ -4,36 +4,51 @@
 
 % construct cell array of names
 clear names
-for l = 1:5
-    for f = 1:36
-        names{f+(l-1)*36} = sprintf('I2_%i_%i',l,f);
+i2Size = s.populations(4).size;
+for l = 1:nLocs
+    for f = 1:nFreqs
+        i2Names{f+(l-1)*nFreqs} = sprintf('I2_%i_%i',l,f);
     end
 end
-for l = 1:5
-    for f = 1:36
-        itemp{f+(l-1)*36} = sprintf('I_%i_%i',l,f);
+iSize = s.populations(1).size;
+for l = 1:nLocs
+    for f = 1:nFreqs
+        iNames{f+(l-1)*nFreqs} = sprintf('I_%i_%i',l,f);
     end
 end
-names = [names itemp];
-for l = 1:5
-    for f = 1:36
-        rtemp{f+(l-1)*36} = sprintf('R_%i_%i',l,f);
+rSize = s.populations(2).size;
+for l = 1:nLocs
+    for f = 1:nFreqs
+        rNames{f+(l-1)*nFreqs} = sprintf('R_%i_%i',l,f);
     end
 end
-names = [names rtemp];
+cSize = s.populations(3).size;
 for l = 1
-    for f = 1:36
-        ctemp{f+(l-1)*36} = sprintf('C_%i_%i',l,f);
+    for f = 1:nFreqs
+        cNames{f+(l-1)*nFreqs} = sprintf('C_%i_%i',l,f);
     end
 end
-names = [names ctemp];
+names = [i2Names iNames rNames cNames]; %order matters!
 
-%% combine connectivity matrices
-adjMtx = zeros(180+180+180+36);
-adjMtx(1:180,181:180*2) = i2iNetcon;
-adjMtx(181:180*2,180*2+1:180*3) = irNetcon;
-adjMtx(180*2+1:180*3,180*3+1:end) = rcNetcon;
+%% combine connectivity matrices, in the order of I2,I,R,C
+i2Start = 1;
+i2End = i2Size;
+iStart = i2Size+1;
+iEnd = iStart+iSize-1;
+rStart = iEnd+1;
+rEnd = rStart+rSize-1;
+cStart = rEnd+1;
+cEnd = cStart+cSize-1;
 
-%%
+adjMtx = zeros(sum([s.populations.size]));
+adjMtx(i2Start:i2End,iStart:iEnd) = i2iNetcon;
+adjMtx(iStart:iEnd,rStart:rEnd) = irNetcon;
+adjMtx(rStart:rEnd,cStart:cEnd) = rcNetcon;
+
+%% graph
 g = digraph(adjMtx,names);
-plot(g);
+figure; p = plot(g,'layout','layered','Marker','o',...
+                   'MarkerSize',8,'NodeLabel',names);
+set(p,'ArrowSize',12)
+layout(p,'layered','direction','down',...
+         'sources',[i2Start:i2End],'sinks',[cStart:cEnd]);
