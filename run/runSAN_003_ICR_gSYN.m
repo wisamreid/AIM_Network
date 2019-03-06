@@ -15,7 +15,8 @@ solverType = 'euler';
 % % solverType = 'rk4';
 dt = 0.025; %ms % the IC input is currently at dt=0.025
 
-study_dir = fullfile(pwd, 'run', mfilename,num2str(round(now)));
+currentTime = datetime('now','Format','yyyyMMdd''-''HHmmss');
+study_dir = fullfile(pwd, 'run', [mfilename char(currentTime)]);
 addpath('dependencies')
 addpath('mechs')
 addpath(genpath('../dynasim'))
@@ -27,7 +28,7 @@ mkdir(fullfile(study_dir, 'solve'));
 
 spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 IC spk library 64Chan200-8000hz\CRM talker4\';
 spkList = ls([spkLoc '*IC.mat']);
-spkFile = spkList(2,:);
+spkFile = spkList(1,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
 copyfile( fullfile(spkLoc, spkFile), spkICCopy);
 
@@ -37,7 +38,8 @@ if ~exist('spk_IC','var')
     spk_IC = spk_IC.spk_IC;
     spk_IC_fs = 40e3;
     spk_IC_t = 1/spk_IC_fs:1/spk_IC_fs:size(spk_IC,1)/spk_IC_fs;
-    simLen = size(spk_IC,1);
+%     simLen = size(spk_IC,1);
+    simLen = 76000;
 end
 
 %% neurons
@@ -140,7 +142,7 @@ s.connections(end).parameters={'gSYN',.12, 'tauR',0.4, 'tauD',10, 'netcon',i2iNe
 
 %% vary
 vary = {
-    'R->R', 'g_postIC', 0.02:0.005:0.05;  
+    'R->R', 'g_postIC', 0.02;  
 };
 nVary = calcNumVary(vary);
 parfor_flag = 0; %double(nVary > 1); % use parfor if multiple sims
@@ -148,7 +150,7 @@ parfor_flag = 0; %double(nVary > 1); % use parfor if multiple sims
 
 %% simulate
 tic
-compile_flag = 1;
+compile_flag = 0;
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
   'study_dir',study_dir, 'debug_flag',1, 'vary',vary, 'verbose_flag',1,...
@@ -166,8 +168,8 @@ end
 
 
 %%
-temp = [data(6).I_V_spikes];
-length(find(temp)) %number of spikes present
+% temp = [data(6).I_V_spikes];
+% length(find(temp)) %number of spikes present
 
 %% plot all cells
 for j = 1:length(data)
