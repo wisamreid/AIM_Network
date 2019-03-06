@@ -101,14 +101,12 @@ s.mechanisms(1).equations=synDoubleExp;
 % build I->R netcon matrix
 % netcons are [N_pre,N_post]
 
-% irNetconSmall = ones(nLocs)-diag(ones(1,nLocs));
-irNetconSmall = randi([0 1], nLocs);
+irNetconSmall = ones(nLocs)-diag(ones(1,nLocs));
 irNetconCell = repmat({irNetconSmall},1,nFreqs);
 irNetconGroupByLoc = blkdiag(irNetconCell{:});
 irNetcon = regroup(irNetconGroupByLoc, [nFreqs,nLocs]);
 
-% i2iNetconGroupByLoc = diag(ones(1,nCells));
-
+i2iNetconGroupByLoc = diag(ones(1,nCells));
 i2iNetcon = regroup(i2iNetconGroupByLoc, [nFreqs,nLocs]);
 
 rcNetconCell = repmat({ones(5,1)},1,nFreqs);
