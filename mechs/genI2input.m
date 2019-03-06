@@ -1,4 +1,4 @@
-function out = genI2input(nFreq)
+function out = genI2input(nFreq,simLen)
 % input to I2 cells; defaulted to be on
 %     1 = on, 0 = off
 % I2 input should have the format of time x freqInd x location
@@ -9,7 +9,7 @@ function out = genI2input(nFreq)
 
 
 % taps = size(fileData.spk_IC,1);
-taps = 76000;
+taps = simLen;
 % dur = 1; %seconds
 fs = 40000;
 nLocs = 5;

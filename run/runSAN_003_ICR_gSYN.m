@@ -15,20 +15,19 @@ solverType = 'euler';
 % % solverType = 'rk4';
 dt = 0.025; %ms % the IC input is currently at dt=0.025
 
-study_dir = fullfile(pwd, 'run', mfilename);
+study_dir = fullfile(pwd, 'run', mfilename,num2str(round(now)));
 addpath('dependencies')
 addpath('mechs')
 addpath(genpath('../dynasim'))
-rmpath(genpath('../PISPA2.0'))
+pathCell = regexp(path,pathsep,'split');
+if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
+
 %% copy IC spikes to study dir
-if exist(study_dir, 'dir')
-  rmdir(study_dir, 's');
-end
 mkdir(fullfile(study_dir, 'solve'));
 
 spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 IC spk library 64Chan200-8000hz\CRM talker4\';
 spkList = ls([spkLoc '*IC.mat']);
-spkFile = spkList(1,:);
+spkFile = spkList(2,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
 copyfile( fullfile(spkLoc, spkFile), spkICCopy);
 
@@ -38,6 +37,7 @@ if ~exist('spk_IC','var')
     spk_IC = spk_IC.spk_IC;
     spk_IC_fs = 40e3;
     spk_IC_t = 1/spk_IC_fs:1/spk_IC_fs:size(spk_IC,1)/spk_IC_fs;
+    simLen = size(spk_IC,1);
 end
 
 %% neurons
@@ -131,7 +131,7 @@ s.connections(end).parameters={'gSYN',.1, 'tauR',0.4, 'tauD',2, 'netcon',rcNetco
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
-s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs}; % 100 hz spiking
+s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs,'simLen',simLen};
 
 
 s.connections(end+1).direction='st->I';
