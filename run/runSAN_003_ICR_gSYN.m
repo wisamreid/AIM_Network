@@ -8,27 +8,28 @@
 
 
 %% solver params
-time_end = 1.9e3; % ms
+time_end = 1.8e3; % ms
 
 solverType = 'euler';
 % solverType = 'modified_euler';
 % % solverType = 'rk4';
 dt = 0.025; %ms % the IC input is currently at dt=0.025
 
-study_dir = fullfile(pwd, 'run', mfilename);
+currentTime = datetime('now','Format','yyyyMMdd''-''HHmmss');
+study_dir = fullfile(pwd, 'run', [mfilename char(currentTime)]);
 addpath('dependencies')
 addpath('mechs')
 addpath(genpath('../dynasim'))
-rmpath(genpath('../PISPA2.0'))
+pathCell = regexp(path,pathsep,'split');
+if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
+
 %% copy IC spikes to study dir
-if exist(study_dir, 'dir')
-  rmdir(study_dir, 's');
-end
 mkdir(fullfile(study_dir, 'solve'));
+talkerSet = 1;
 
 spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 IC spk library 64Chan200-8000hz\CRM talker4\';
 spkList = ls([spkLoc '*IC.mat']);
-spkFile = spkList(1,:);
+spkFile = spkList(talkerSet,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
 copyfile( fullfile(spkLoc, spkFile), spkICCopy);
 
@@ -38,6 +39,8 @@ if ~exist('spk_IC','var')
     spk_IC = spk_IC.spk_IC;
     spk_IC_fs = 40e3;
     spk_IC_t = 1/spk_IC_fs:1/spk_IC_fs:size(spk_IC,1)/spk_IC_fs;
+%     simLen = size(spk_IC,1);
+    simLen = 76000;
 end
 
 %% neurons
@@ -119,12 +122,11 @@ s.connections(end).parameters={'g_postIC',0.01}; % 100 hz spiking
 
 s.connections(end+1).direction='R->R';
 s.connections(end).mechanism_list='IC';
-% s.connections(end).parameters={'g_postIC',0.07};
-s.connections(end).parameters={'g_postIC',0.03};
+s.connections(end).parameters={'g_postIC',0.05};
 
 s.connections(end+1).direction='I->R';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.27, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.25, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
 %reversal potential ESYN = inhibitory
 
 s.connections(end+1).direction='R->C';
@@ -133,7 +135,7 @@ s.connections(end).parameters={'gSYN',.15, 'tauR',0.4, 'tauD',2, 'netcon',rcNetc
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
-s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs}; % 100 hz spiking
+s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs,'simLen',simLen+200};
 
 
 s.connections(end+1).direction='st->I';
@@ -142,7 +144,7 @@ s.connections(end).parameters={'gSYN',.12, 'tauR',0.4, 'tauD',10, 'netcon',i2iNe
 
 %% vary
 vary = {
-    'R->R', 'g_postIC', 0.02:0.005:0.05;  
+    'R->R', 'g_postIC', 0.02;  
 };
 nVary = calcNumVary(vary);
 parfor_flag = double(nVary > 1); % use parfor if multiple sims
@@ -168,8 +170,8 @@ end
 
 
 %%
-temp = [data(6).I_V_spikes];
-length(find(temp)) %number of spikes present
+% temp = [data(6).I_V_spikes];
+% length(find(temp)) %number of spikes present
 
 %% plot all cells
 for j = 1:length(data)
@@ -210,9 +212,10 @@ addpath('eval_scripts')
 
 %%
 IC_info = load(fullfile(spkICCopy), 'fcoefs','cf');
-targetLoc = 'eval_data\TM_00_90_set_01_target.wav';
-targetSpatializedLoc = 'eval_data\TM_00_90_set_01_target_conv.wav';
-mixedLoc = 'eval_data\TM_00_90_set_01_mixed.wav';
+wavList = ls([spkLoc sprintf('*%02i*.wav',talkerSet)]);
+targetLoc = [spkLoc strtrim(wavList(4,:))];
+targetSpatializedLoc = [spkLoc strtrim(wavList(5,:))];
+mixedLoc = [spkLoc strtrim(wavList(3,:))];
 
 tgt = audioread(targetLoc);
 targetFiltmono = ERBFilterBank(tgt,IC_info.fcoefs);
@@ -235,7 +238,7 @@ plotNum = round(sqrt(length(data)+2));
 subplot(plotNum,plotNum,1); 
 icSpikes = logical(squeeze(spk_IC(:,:,3))'); 
 plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
-xlim([0 2000]);
+xlim([0 time_end]);
 title('0 deg IC spikes')
 i = 3;
 idx = 1+nFreqs*(i-1):nFreqs*i;
@@ -243,7 +246,7 @@ for i = 1:length(data)
     subplot(plotNum,plotNum,i+1)
     RVspikes = logical([data(i).R_V_spikes])';
     plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
-    xlim([0 2000])
+    xlim([0 time_end])
     title(sprintf('R spikes, g IC-R %d',data(i).R_R_g_postIC));
 end
 subplot(plotNum,plotNum,i+2)
