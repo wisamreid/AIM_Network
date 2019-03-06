@@ -3,8 +3,8 @@
 % This file produces the exact same output as the initial implementation
 % (before combining frequency and location into one dimension). It's a good
 % starting point for further investigation.
-% Runtime for dsSimulate is ~30s (down from ~3 min in the previous 
-% implementation)
+% Runtime for dsSimulate is ~30s in the test system (down from ~3 min in
+% the previous implementation)
 
 
 %% solver params
