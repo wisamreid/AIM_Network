@@ -25,10 +25,11 @@ if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
 
 %% copy IC spikes to study dir
 mkdir(fullfile(study_dir, 'solve'));
+talkerSet = 1;
 
 spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 IC spk library 64Chan200-8000hz\CRM talker4\';
 spkList = ls([spkLoc '*IC.mat']);
-spkFile = spkList(2,:);
+spkFile = spkList(talkerSet,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
 copyfile( fullfile(spkLoc, spkFile), spkICCopy);
 
@@ -120,11 +121,11 @@ s.connections(end).parameters={'g_postIC',0.01}; % 100 hz spiking
 s.connections(end+1).direction='R->R';
 s.connections(end).mechanism_list='IC';
 % s.connections(end).parameters={'g_postIC',0.07};
-s.connections(end).parameters={'g_postIC',0.02};
+s.connections(end).parameters={'g_postIC',0.05};
 
 s.connections(end+1).direction='I->R';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.17, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.25, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
 %reversal potential ESYN = inhibitory
 
 s.connections(end+1).direction='R->C';
@@ -215,7 +216,6 @@ imagesc(maskC); title('C mask');
 
 %%
 IC_info = load(fullfile(spkICCopy), 'fcoefs','cf');
-talkerSet = 2;
 wavList = ls([spkLoc sprintf('*%02i*.wav',talkerSet)]);
 targetLoc = [spkLoc strtrim(wavList(4,:))];
 targetSpatializedLoc = [spkLoc strtrim(wavList(5,:))];
