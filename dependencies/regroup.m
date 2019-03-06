@@ -1,8 +1,8 @@
 function out = regroup(in, groupSizes)
 % out = regroup(in, groupSizes)
 %   groupSizes - a vector of various group lengths. Should have more than
-%                one element. For example, to group the data first by
-%                frequency, then locations (i.e. [1:36,1:36,1:36,...]), then
+%                one element. For example, to group the data by
+%                locations (i.e. [1:36,1:36,1:36,...]), then
 %                groupSizes should be [36 5].
 % @ Kenny Chou
 % Boston Univeristy 2/2019
