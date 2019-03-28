@@ -15,8 +15,8 @@ solverType = 'euler';
 % % solverType = 'rk4';
 dt = 0.025; %ms % the IC input is currently at dt=0.025
 
-currentTime = datetime('now','Format','yyyyMMdd''-''HHmmss');
-study_dir = fullfile(pwd, 'run', [mfilename char(currentTime)]);
+currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
+study_dir = fullfile(pwd, 'run', [mfilename currentTime]);
 addpath('dependencies')
 addpath('mechs')
 addpath(genpath('../dynasim'))
