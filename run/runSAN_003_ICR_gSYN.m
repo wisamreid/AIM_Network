@@ -27,7 +27,7 @@ if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
 mkdir(fullfile(study_dir, 'solve'));
 talkerSet = 1;
 
-spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 IC spk library 64Chan200-8000hz\CRM talker4\';
+spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 FRv4 IC spk library 64Chan200-8000hz optimized\CRM 2source talker4\';
 spkList = ls([spkLoc '*IC.mat']);
 spkFile = spkList(talkerSet,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
@@ -142,7 +142,8 @@ s.connections(end).parameters={'gSYN',.12, 'tauR',0.4, 'tauD',10, 'netcon',i2iNe
 
 %% vary
 vary = {
-    'R->R', 'g_postIC', 0.02;  
+    'R->R', 'g_postIC', 0.02:0.01:0.05;  
+%     'I->I','g_postIC',0.01;
 };
 nVary = calcNumVary(vary);
 parfor_flag = double(nVary > 1); % use parfor if multiple sims
@@ -155,6 +156,10 @@ data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,..
   'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
   'study_dir',study_dir, 'debug_flag',1, 'vary',vary, 'verbose_flag',1,...
   'parfor_flag',parfor_flag,'compile_flag',compile_flag);
+% data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
+%   'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
+%   'study_dir',study_dir, 'debug_flag',1, 'verbose_flag',1,...
+%   'parfor_flag',parfor_flag,'compile_flag',compile_flag);
 toc
 
 %% insert spikes
@@ -194,7 +199,7 @@ for j = 1:length(data)
         subplot(4,5,i+15)
         icSpikes = logical(squeeze(spk_IC(:,:,i))'); 
         plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
-        xlim([0 2000]); title('C spikes')
+        xlim([0 2000]); title('IC spikes')
     end
 end
 
@@ -208,7 +213,8 @@ addpath('eval_scripts')
 % imagesc(maskC); title('C mask');
 
 
-%%
+%% reconstruction
+clear out
 IC_info = load(fullfile(spkICCopy), 'fcoefs','cf');
 wavList = ls([spkLoc sprintf('*%02i*.wav',talkerSet)]);
 targetLoc = [spkLoc strtrim(wavList(4,:))];
@@ -217,7 +223,7 @@ mixedLoc = [spkLoc strtrim(wavList(3,:))];
 
 tgt = audioread(targetLoc);
 targetFiltmono = ERBFilterBank(tgt,IC_info.fcoefs);
-figure;plot_db(targetFiltmono,90);
+% figure;plot_db(targetFiltmono,90);
 
 fs = 40000;
 params.fcoefs = IC_info.fcoefs;
@@ -232,6 +238,7 @@ for j = 1:length(data)
 end
 
 %% Plot IC v R cells
+figure
 plotNum = round(sqrt(length(data)+2));
 subplot(plotNum,plotNum,1); 
 icSpikes = logical(squeeze(spk_IC(:,:,3))'); 
