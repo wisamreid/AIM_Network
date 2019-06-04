@@ -27,7 +27,7 @@ if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
 mkdir(fullfile(study_dir, 'solve'));
 talkerSet = 1;
 
-spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 IC spk library 64Chan200-8000hz\CRM talker4\';
+spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 FRv4 IC spk library 64Chan200-8000hz optimized\CRM 2source talker4\';
 spkList = ls([spkLoc '*IC.mat']);
 spkFile = spkList(talkerSet,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
@@ -160,7 +160,7 @@ toc
 %% insert spikes
 V_spike = 50;
 for iData = 1:length(data)
-  for pop = {'I','R','C','st'}
+  for pop = {s.populations.name}
     pop = pop{1};
     data(iData).([pop '_V'])(data(iData).([pop '_V_spikes']) == 1) = V_spike; % insert spike
   end
@@ -198,55 +198,55 @@ for j = 1:length(data)
     end
 end
 
-%% Evaluate Output Intelligibilty
-addpath('eval_scripts')
-% cSpikes = ([data(5).C_V_spikes])';
-% cSpikes = spk_IC(:,:,3)';
-% maskC = calcSpkMask(cSpikes',40000,'alpha',.02);
-% maskC = calcSpkMask(squeeze(spk_IC(:,3,:)),40000,'alpha',.2);
-% figure;
-% imagesc(maskC); title('C mask');
-
-
-%%
-IC_info = load(fullfile(spkICCopy), 'fcoefs','cf');
-wavList = ls([spkLoc sprintf('*%02i*.wav',talkerSet)]);
-targetLoc = [spkLoc strtrim(wavList(4,:))];
-targetSpatializedLoc = [spkLoc strtrim(wavList(5,:))];
-mixedLoc = [spkLoc strtrim(wavList(3,:))];
-
-tgt = audioread(targetLoc);
-targetFiltmono = ERBFilterBank(tgt,IC_info.fcoefs);
-figure;plot_db(targetFiltmono,90);
-
-fs = 40000;
-params.fcoefs = IC_info.fcoefs;
-params.cf = IC_info.cf;
-params.fs = fs;
-% params.frgain = 1;
-% params.low_freq = 200; %min freq of the filter
-% params.high_freq = 8000;
-% params.numChannel = length(IC_info.cf);
-for j = 1:length(data)
-    [out(j,:),rstim1,rstim2,rstim3] = recon_eval(data(j),targetLoc,targetSpatializedLoc,mixedLoc,params);
-end
-
-%% Plot IC v R cells
-plotNum = round(sqrt(length(data)+2));
-subplot(plotNum,plotNum,1); 
-icSpikes = logical(squeeze(spk_IC(:,:,3))'); 
-plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
-xlim([0 time_end]);
-title('0 deg IC spikes')
-i = 3;
-idx = 1+nFreqs*(i-1):nFreqs*i;
-for i = 1:length(data)
-    subplot(plotNum,plotNum,i+1)
-    RVspikes = logical([data(i).R_V_spikes])';
-    plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
-    xlim([0 time_end])
-    title(sprintf('R spikes, g IC-R %d',data(i).R_R_g_postIC));
-end
-subplot(plotNum,plotNum,i+2)
-plot_db(targetFiltmono,90);
-title('Target')
+% % % %% Evaluate Output Intelligibilty
+% % % addpath('eval_scripts')
+% % % % cSpikes = ([data(5).C_V_spikes])';
+% % % % cSpikes = spk_IC(:,:,3)';
+% % % % maskC = calcSpkMask(cSpikes',40000,'alpha',.02);
+% % % % maskC = calcSpkMask(squeeze(spk_IC(:,3,:)),40000,'alpha',.2);
+% % % % figure;
+% % % % imagesc(maskC); title('C mask');
+% % % 
+% % % 
+% % % %%
+% % % IC_info = load(fullfile(spkICCopy), 'fcoefs','cf');
+% % % wavList = ls([spkLoc sprintf('*%02i*.wav',talkerSet)]);
+% % % targetLoc = [spkLoc strtrim(wavList(4,:))];
+% % % targetSpatializedLoc = [spkLoc strtrim(wavList(5,:))];
+% % % mixedLoc = [spkLoc strtrim(wavList(3,:))];
+% % % 
+% % % tgt = audioread(targetLoc);
+% % % targetFiltmono = ERBFilterBank(tgt,IC_info.fcoefs);
+% % % figure;plot_db(targetFiltmono,90);
+% % % 
+% % % fs = 40000;
+% % % params.fcoefs = IC_info.fcoefs;
+% % % params.cf = IC_info.cf;
+% % % params.fs = fs;
+% % % % params.frgain = 1;
+% % % % params.low_freq = 200; %min freq of the filter
+% % % % params.high_freq = 8000;
+% % % % params.numChannel = length(IC_info.cf);
+% % % for j = 1:length(data)
+% % %     [out(j,:),rstim1,rstim2,rstim3] = recon_eval(data(j),targetLoc,targetSpatializedLoc,mixedLoc,params);
+% % % end
+% % % 
+% % % %% Plot IC v R cells
+% % % plotNum = round(sqrt(length(data)+2));
+% % % subplot(plotNum,plotNum,1); 
+% % % icSpikes = logical(squeeze(spk_IC(:,:,3))'); 
+% % % plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
+% % % xlim([0 time_end]);
+% % % title('0 deg IC spikes')
+% % % i = 3;
+% % % idx = 1+nFreqs*(i-1):nFreqs*i;
+% % % for i = 1:length(data)
+% % %     subplot(plotNum,plotNum,i+1)
+% % %     RVspikes = logical([data(i).R_V_spikes])';
+% % %     plotSpikeRasterFs(RVspikes(idx,:), 'PlotType','vertline', 'Fs',spk_IC_fs);
+% % %     xlim([0 time_end])
+% % %     title(sprintf('R spikes, g IC-R %d',data(i).R_R_g_postIC));
+% % % end
+% % % subplot(plotNum,plotNum,i+2)
+% % % plot_db(targetFiltmono,90);
+% % % title('Target')
