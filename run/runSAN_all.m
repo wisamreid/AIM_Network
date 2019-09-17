@@ -38,7 +38,7 @@ end
 s=[];
 
 nLocs = 5;
-nFreqs = 36;
+nFreqs = 64;
 nCells = nLocs*nFreqs;
 
 noise = 0.01; % low noise
