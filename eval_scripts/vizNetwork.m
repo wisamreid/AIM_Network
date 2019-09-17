@@ -37,7 +37,7 @@ for l = 1
         icNames{f+(l-1)*nFreqs} = sprintf('IC_%i_%i',l,f);
     end
 end
-names = [icNames i2Names iNames rNames cNames]; %order matters!
+names2 = [icNames i2Names iNames rNames cNames]; %order matters!
 
 %% IC NetCon to I and R neurons, not included in s.populations
 

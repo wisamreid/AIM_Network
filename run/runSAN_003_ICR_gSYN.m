@@ -27,7 +27,7 @@ if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
 mkdir(fullfile(study_dir, 'solve'));
 talkerSet = 1;
 
-spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\CISPA2.0\Data\006 FRv4 IC spk library 64Chan200-8000hz optimized\CRM 2source talker4\';
+spkLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\IC - staggered talkers 64Chan200-20000hz\CRM talker4\';
 spkList = ls([spkLoc '*IC.mat']);
 spkFile = spkList(talkerSet,:);
 spkICCopy = fullfile(study_dir, 'solve', 'IC_spks.mat');
@@ -35,8 +35,8 @@ copyfile( fullfile(spkLoc, spkFile), spkICCopy);
 
 if ~exist('spk_IC','var')
     %spk_IC should have dimensions [time x freq chan x spatial chan]
-    spk_IC = load(fullfile(spkICCopy), 'spk_IC','fcoefs','cf');
-    spk_IC = spk_IC.spk_IC;
+    load(fullfile(spkICCopy), 'spk_IC','fcoefs','cf');
+    spk_IC = spkTime2Train(spk_IC,40000);
     spk_IC_fs = 40e3;
     spk_IC_t = 1/spk_IC_fs:1/spk_IC_fs:size(spk_IC,1)/spk_IC_fs;
 %     simLen = size(spk_IC,1);
@@ -116,20 +116,20 @@ rcNetcon = regroup(rcNetconGroupByLoc, [nFreqs,nLocs]);
 s.connections(1).direction='I->I';
 s.connections(1).mechanism_list='IC';
 % s.connections(end).parameters={'g_postIC',0.11}; % 1000 hz spiking
-s.connections(end).parameters={'g_postIC',0.01}; % 100 hz spiking
+s.connections(end).parameters={'g_postIC',0.015}; % 100 hz spiking
 
 s.connections(end+1).direction='R->R';
 s.connections(end).mechanism_list='IC';
-s.connections(end).parameters={'g_postIC',0.05};
+s.connections(end).parameters={'g_postIC',0.015};
 
 s.connections(end+1).direction='I->R';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.25, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.4, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
 %reversal potential ESYN = inhibitory
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.15, 'tauR',0.4, 'tauD',2, 'netcon',rcNetcon}; 
+s.connections(end).parameters={'gSYN',.2, 'tauR',0.4, 'tauD',2, 'netcon',rcNetcon}; 
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
@@ -138,12 +138,12 @@ s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs,'simLen',simLen+200
 
 s.connections(end+1).direction='st->I';
 s.connections(end).mechanism_list='synDoubleExp';
-s.connections(end).parameters={'gSYN',.12, 'tauR',0.4, 'tauD',10, 'netcon',i2iNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',.2, 'tauR',0.4, 'tauD',10, 'netcon',i2iNetcon, 'ESYN',-80}; 
 
 %% vary
 vary = {
-    'R->R', 'g_postIC', 0.02:0.01:0.05;  
-%     'I->I','g_postIC',0.01;
+%     'R->R', 'g_postIC', 0.02:0.01:0.05;  
+    'I->I','g_postIC',0.01;
 };
 nVary = calcNumVary(vary);
 parfor_flag = double(nVary > 1); % use parfor if multiple sims
@@ -199,18 +199,38 @@ for j = 1:length(data)
         subplot(4,5,i+15)
         icSpikes = logical(squeeze(spk_IC(:,:,i))'); 
         plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',spk_IC_fs);
-        xlim([0 2000]); title('IC spikes')
+        xlim([0 2000]); 
+        if i==1, ylabel('IC spikes'); end
     end
 end
 
-% % % %% Evaluate Output Intelligibilty
-% % % addpath('eval_scripts')
-% % % % cSpikes = ([data(5).C_V_spikes])';
-% % % % cSpikes = spk_IC(:,:,3)';
-% % % % maskC = calcSpkMask(cSpikes',40000,'alpha',.02);
-% % % % maskC = calcSpkMask(squeeze(spk_IC(:,3,:)),40000,'alpha',.2);
-% % % % figure;
-% % % % imagesc(maskC); title('C mask');
+%% Evaluate Output Intelligibilty
+addpath('eval_scripts')
+fs = 40000;
+targetName = ls(sprintf('%s*set_%02i_*target_conv.wav',spkLoc,talkerSet))
+mixedName = ls(sprintf('%s*set_%02i_*target_conv.wav',spkLoc,talkerSet))
+target = audioread([spkLoc targetName]);
+mixed = audioread([spkLoc mixedName]);
+cSpikes = ([data.C_V_spikes])';
+params = struct();
+params.fcoefs = fcoefs;
+params.cf = cf;
+params.fs = fs;
+params.spatialChan = 3;
+params.delay = 0;
+
+% FRmask reconstruction
+params.type = 1;
+params.maskRatio = 0;
+params.tau = 0.018;
+[st,rstim] = recon_eval(cSpikes',target,mixed,params);
+
+
+% % % cSpikes = spk_IC(:,:,3)';
+% % % maskC = calcSpkMask(cSpikes',40000,'alpha',.02);
+% % % maskC = calcSpkMask(squeeze(spk_IC(:,3,:)),40000,'alpha',.2);
+% figure;
+% imagesc(maskC); title('C mask');
 % % % 
 % % % 
 % % % %% reconstruction

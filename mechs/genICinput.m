@@ -16,9 +16,9 @@ else
     fileData = load('..\IC_spks.mat','spk_IC');
 end
 
+spk_IC = spkTime2Train(fileData.spk_IC,40000);
 % IC data should have the format of time x freqInd x location
 % Permute data if this is misshaped.
-spk_IC = fileData.spk_IC;
 if size(spk_IC,2) < size(spk_IC,3)
     spk_IC = permute(spk_IC,[1,3,2]);
 end
