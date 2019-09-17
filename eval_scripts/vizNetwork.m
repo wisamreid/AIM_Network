@@ -12,7 +12,7 @@ for l = 1:nLocs
     for f = 1:nFreqs
         i2Names{f+(l-1)*nFreqs} = sprintf('I2_%i_%i',l,f);
     end
-end
+end 
 iSize = s.populations(1).size;
 for l = 1:nLocs
     for f = 1:nFreqs
