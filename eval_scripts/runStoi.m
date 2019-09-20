@@ -1,8 +1,32 @@
-function out = runStoi(a,b,fs_a,fs_b,warp)
-%out = RUNSTOI(a,b,fs)
-% warp = option to timewarp.
-%matches the lenths of the input vectors before calling stoi()
-%zeropadding is applied to the end of the shorter vector
+function out = runStoi(a,b,fs_a,fs_b)
+% out = RUNSTOI(a,b,fs)
+%   Calculates STOI on two soundwaves
+%   matches the lengths & normalize the input vectors before calling stoi()
+%   zeropadding is applied to the end of the shorter vector.
+% Inputs:
+%   a, b = soundwaves. If dual channel, combine the two.
+%
+% STOI operates on single channel audio inputs.
+%
+% @Kenny Chou, BU Hearing Reserach Center
+% 20190916 - removed outdated 'warp' option
+
+
+%combine channels
+if ~isvector(a)
+    if size(a,1) > size(a,2)
+        a = sum(a,2); 
+    else
+        a = sum(a);
+    end
+end
+if ~isvector(b)
+    if size(b,1) > size(b,2)
+        b = sum(b,2); 
+    else
+        b = sum(b);
+    end
+end
 
 %check row or vector
 if ~isrow(a)
@@ -12,9 +36,9 @@ if ~isrow(b)
     b = b';
 end
 
-%timewarp
-if ~exist('warp','var'), warp = 0; end
-if warp; b = timeMatch(a,b,fs_a,fs_b,0,0); end
+%normalize inputs
+a = a/max(abs(a));
+b = b/max(abs(b));
 
 %zero pad if necessary
 d = length(a) - length(b);
