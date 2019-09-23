@@ -85,7 +85,7 @@ if ndims(masks) == 3
     for i = 1:size(masks,3)
         masksNorm(:,:,i) = masks(:,:,i)/max(max(masks(:,:,i)));
     end
-    
+
     % remove side channels
     centerM = masksNorm(:,:,3);
     rightM1 = masksNorm(:,:,5);
@@ -100,6 +100,7 @@ if ndims(masks) == 3
     end
 else
     spkMask = masks;
+    thr = 0;
 end
 spkMask = spkMask./max(max(abs(spkMask))); %normalize to [0,1]
 
@@ -110,7 +111,7 @@ st = struct();
 if ismember(1,params.type)
     [rstim1dual, maskedWav] = applyMask(spkMask,mixedFiltL,mixedFiltR,frgain,'filt');
     st1 = runStoi(rstim1dual,target,fs,fs);
-    
+
     rstim.r1d = rstim1dual;
     rstim.tf = maskedWav;
     st.r1 = st1;
@@ -125,11 +126,11 @@ if ismember(2,params.type)
         mixedEnvL(i,:)= envelope(mixedFiltL(i,:)); %envlope of mixture
         mixedEnvR(i,:)= envelope(mixedFiltR(i,:)); %envlope of mixture
     end
-    
+
     % perform reconstruction
     [rstim2dual, ~] = applyMask(spkMask,mixedEnvL,mixedEnvR,frgain,'env',cf);
     st2 = runStoi(rstim2dual,target,fs,fs);
-    
+
     rstim.r2d = rstim2dual;
     st.r2 = st2;
 end
@@ -159,14 +160,14 @@ if ismember(4,params.type)
         mixedEnvL(i,:)= envelope(mixedFiltL(i,:)); %envlope of mixture
         mixedEnvR(i,:)= envelope(mixedFiltR(i,:)); %envlope of mixture
     end
-    
+
     % mixed vocoding of filtered mixture envelope
     [rstim4dual, rstim4mono] = applyMask(spkMask,mixedEnvL,mixedEnvR,frgain,'mixed',cf);
     st4 = runStoi(rstim4mono,target,fs,fs);
 
     rstim4pp = runF0(rstim4dual,fs);
     st4pp = runStoi(rstim4pp,target,fs,fs);
-    
+
     rstim.r4d = rstim4dual;
     rstim.r4m = rstim4mono;
     rstim.r4pp = rstim4pp;
