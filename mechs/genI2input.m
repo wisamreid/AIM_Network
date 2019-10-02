@@ -18,7 +18,7 @@ nLocs = 5;
 chanSwitch = cell(1,5);
 chanSwitch{1} = []; %ms
 chanSwitch{2} = [];
-chanSwitch{3} = [0];
+chanSwitch{3} = [];
 chanSwitch{4} = [];
 chanSwitch{5} = [];
 

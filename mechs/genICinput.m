@@ -16,7 +16,12 @@ else
     fileData = load('..\IC_spks.mat','spk_IC');
 end
 
-spk_IC = spkTime2Train(fileData.spk_IC,40000);
+if iscell(fileData.spk_IC)
+    spk_IC = spkTime2Train(fileData.spk_IC,40000);
+else
+    spk_IC = fileData.spk_IC;
+end
+
 % IC data should have the format of time x freqInd x location
 % Permute data if this is misshaped.
 if size(spk_IC,2) < size(spk_IC,3)
