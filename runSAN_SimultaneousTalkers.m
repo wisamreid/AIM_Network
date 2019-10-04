@@ -14,45 +14,37 @@ if any(strcmpi('PISPA2.0',pathCell)), rmpath(genpath('../PISPA2.0')); end
 
 %% load IC spikes, save to study dir
 mkdir(fullfile(study_dir, 'solve'));
-fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\broad mode - staggered talkers 64Chan200-20000hz\CRM talker4\';
+% fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\IC - simultaneous talkers 64Chan 200-20000hz';
+fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\IC - simultaneous talkers 64Chan 200-8000Hz\TIMIT';
 talkerSet = 1;
 
 % load data
-chans = {'00','-90','90'};
-swav123 = [];
-spk123 = [];
+mixedName = ls([fileloc filesep sprintf('*set_%02i*mixed.wav',talkerSet)]);
+mixed = audioread([fileloc filesep mixedName]);
+spkName = ls([fileloc filesep sprintf('*set_%02i*SpkIC.mat',talkerSet)]);
+spks = load([fileloc filesep spkName]);
+if ~isfield(spks,'fs'), spks.fs = 16000; end
+spk_IC = spkTime2Train(spks.spk_IC,spks.fs,length(mixed));
+refNames = {'masker1_conv','masker2_conv','target_conv'};
 for i = 1:3
-    ic(i).wav = audioread([fileloc filesep '0_masker_set_01_pos_' chans{i} 'degAz_target_conv.wav']);
-    ic(i).data = load([fileloc filesep '0_masker_set_01_pos_' chans{i} 'degAz_SpkIC.mat']);
-    ic(i).spksbin = spkTime2Train(s(i).data.spk_IC,s(i).data.fs,length(s(i).wav));
-    swav123 = [swav123;ic(i).wav];
-    spk123 = [spk123;ic(i).spksbin];
+    temp = ls([fileloc filesep sprintf('*set_%02i*%s.wav',talkerSet,refNames{i})]);
+    ref(i).wav = audioread([fileloc filesep temp]);
 end
-spk_IC = spk123;
-target = swav123;
-mixed = target;
+tgt = ref(3).wav;
+
 save(fullfile(study_dir, 'solve', 'IC_spks.mat'),'spk_IC')
 simLen = length(spk_IC);
-fs = ic(1).data.fs;
-fcoefs = ic(1).data.fcoefs;
-cf  = ic(1).data.cf;
-% if ~exist('spk_IC','var')
-%     %spk_IC should have dimensions [time x freq chan x spatial chan]
-%     load(fullfile(spkICCopy), 'spk_IC','fcoefs','cf');
-%     spk_IC = spkTime2Train(spk_IC,40000);
-%     spk_IC_fs = 40e3;
-%     spk_IC_t = 1/spk_IC_fs:1/spk_IC_fs:size(spk_IC,1)/spk_IC_fs;
-% %     simLen = size(spk_IC,1);
-%     simLen = 76000;
-% end
+fs = spks.fs;
+fcoefs = spks.fcoefs;
+cf  = spks.cf;
 
 %% solver params
-time_end = round(simLen/fs*1000); % ms
+time_end = floor(simLen/fs*1000); % ms
 
 solverType = 'euler';
 % solverType = 'modified_euler';
 % % solverType = 'rk4';
-dt = 0.025; %ms % the IC input is currently at dt=0.025
+dt = 1/fs*1000; %ms % the IC input is currently at dt=0.025
 
 %% neurons
 % model structure
@@ -208,7 +200,6 @@ end
 
 %% Evaluate Output Intelligibilty
 addpath('eval_scripts')
-fs = 40000;
 % targetName = ls(sprintf('%s*set_%02i_*target_conv.wav',spkLoc,talkerSet))
 % mixedName = ls(sprintf('%s*set_%02i_*target_conv.wav',spkLoc,talkerSet))
 % target = audioread([spkLoc targetName]);
@@ -225,36 +216,34 @@ params.delay = 0;
 params.type = 1;
 params.maskRatio = 0;
 params.tau = 0.018;
-[st,rstim] = recon_eval(cSpikes',target,mixed,params);
+[st,rstim] = recon_eval(cSpikes',tgt,mixed,params);
 
 %% calculate NCC
-ic(2).wav = [zeros(length(ic(1).wav),2); ic(2).wav];
-ic(3).wav = [zeros(length(ic(2).wav),2); ic(3).wav];
-
-h1 = figure(1);
-h2 = figure(2);
-
 for i = 1:3    
-    ref(i).tf = ERBFilterBank(ic(i).wav(:,1),ic(i).data.fcoefs)+ERBFilterBank(ic(i).wav(:,2),ic(i).data.fcoefs);
+    ref(i).tf = ERBFilterBank(ref(i).wav(:,1),spks.fcoefs)+ERBFilterBank(ref(i).wav(:,2),spks.fcoefs);
     ev(i).cc = movxcorrKC(ref(i).tf,rstim.tf.L+rstim.tf.R,fs*0.02);
+    ev(i).scc = smoothdata(ev(i).cc,'movmean',10000);
+    toc
+end
+
+h1 = figure('position',[200 200 600 300]);
+h2 = figure('position',[200 200 600 300]);
+
+for i = 1:3
     set(0, 'CurrentFigure', h1)
     plot(ev(i).cc); hold on;
-    ev(i).scc = smoothdata(ev(i).cc,'movmean',10000);
     set(0, 'CurrentFigure', h2)
-    plot(ev(i).scc); hold on;
-    toc
+    plot(ev(i).scc,'linewidth',2); hold on;
 end
 
 set(0, 'CurrentFigure', h1)
 legend('S2','S3','S1')
 ylabel('NCC')
-title(['Reconstruction from ' chans{j} 'degree channel'])
 
 set(0, 'CurrentFigure', h2)
 legend('S2','S3','S1')
 ylabel('Smoothed NCC')
-title(['Reconstruction from ' chans{j} 'degree channel'])
-
+ylim([0,1])
 
 
 % % % cSpikes = spk_IC(:,:,3)';
