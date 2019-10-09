@@ -17,7 +17,8 @@ else
 end
 
 if iscell(fileData.spk_IC)
-    spk_IC = spkTime2Train(fileData.spk_IC,40000);
+    fs = 44100;
+    spk_IC = spkTime2Train(fileData.spk_IC,fs,2*fs);
 else
     spk_IC = fileData.spk_IC;
 end
