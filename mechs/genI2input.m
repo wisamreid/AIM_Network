@@ -1,4 +1,5 @@
-function out = genI2input(nFreq,simLen)
+function out = genI2input(nFreq,nLocs,simLen,fs)
+% out = genI2input(nFreq,nLocs,simLen,fs)
 % input to I2 cells; defaulted to be on
 %     1 = on, 0 = off
 % I2 input should have the format of time x freqInd x location
@@ -7,20 +8,16 @@ function out = genI2input(nFreq,simLen)
 % @ Kenny Chou
 % Boston Univeristy, 2019
 
-
-% taps = size(fileData.spk_IC,1);
 taps = simLen;
 % dur = 1; %seconds
-fs = 40000;
-nLocs = 5;
 
 %define when input current to I2 will be turned off and on
-chanSwitch = cell(1,5);
+chanSwitch = cell(1,nLocs);
 chanSwitch{1} = []; %ms
 chanSwitch{2} = [];
 chanSwitch{3} = [];
 chanSwitch{4} = [];
-chanSwitch{5} = [];
+chanSwitch{5} = [0];
 
 i2input = ones(taps,nFreq,nLocs);
 for i = 1:nLocs
