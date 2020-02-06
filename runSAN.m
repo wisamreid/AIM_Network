@@ -1,4 +1,4 @@
-function data = runSAN_ConsecutiveTalkers(study_dir,spk_IC,varies,options)
+function data = runSAN(study_dir,spk_IC,varies,options)
 %% solver params
 fs = options.fs;
 simLen = length(spk_IC);
@@ -114,7 +114,8 @@ for i = 1:length(varies)
     vary{i,3} = varies(i).range;
 end
 nVary = calcNumVary(vary);
-parfor_flag = double(nVary > 1); % use parfor if multiple sims
+parfor_flag = 0;
+% parfor_flag = double(nVary > 1); % use parfor if multiple sims
 
 
 %% simulate
@@ -162,10 +163,14 @@ if options.plotRasters
             xlim([0 time_end+200]); 
             if i==1, ylabel('IC spikes'); end
         end
+    
+        % save raster plot
+        for i = 1:length(data.varied)
+            titleTxt{i} = [data.varied{i} ':' num2str(eval(['data.' data.varied{i}]))];
+        end
+        suptitle(titleTxt);
+        saveLoc = options.saveLoc;
+        saveTifName = fullfile(saveLoc,sprintf('%s %02i.tif',options.expVar,i));
+        saveas(gcf,saveTifName)
     end
-
-%     suptitle(['SI tonic: ' num2str(data.I_Itonic) '   TD-I g_{syn}: ' num2str(data.model.parameters.I_st_synDoubleExp_gSYN)])
-%     saveLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Itonic_v_TDIgsyn';
-%     saveTifName = fullfile(saveLoc,sprintf('I%.2f_TDI%.2f.tif',data.I_Itonic,data.model.parameters.I_st_synDoubleExp_gSYN));
-%     saveas(gcf,saveTifName)
 end
