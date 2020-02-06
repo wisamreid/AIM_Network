@@ -167,8 +167,8 @@ elseif ~isnan(rasterWindowOffset) && relSpikeStartTime~=0
 end
 
 %% Initialize figure and begin plotting logic
-figure(figH);
-axes(axH);
+set(0,'currentfigure',figH);
+% axes(axH);
 hold on;
 
 if islogical(spikes)
