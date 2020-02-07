@@ -137,9 +137,11 @@ for iData = 1:length(data)
 end
 
 if options.plotRasters
+    set(0, 'DefaultFigureVisible', 'off')
+    figure;
     %% plot all cells
     for j = 1:length(data)
-        figure;
+        clf;
         IVspikes = logical([data(j).I_V_spikes])';
         RVspikes = logical([data(j).R_V_spikes])';
         I2Vspikes = logical([data(j).st_V_spikes])';
@@ -165,12 +167,21 @@ if options.plotRasters
         end
     
         % save raster plot
-        for i = 1:length(data.varied)
-            titleTxt{i} = [data.varied{i} ':' num2str(eval(['data.' data.varied{i}]))];
+        suptitle({});
+        titleTxt = {};
+        for i = 1:length(data(j).varied)
+            titleTxt{i} = [data(j).varied{i} ': ' num2str(eval(sprintf('data(%i).%s',j,data(j).varied{i})))];
+            tempidx = strfind(titleTxt{i},'_');
+            titleTxt{i}(tempidx) = '-';
         end
-        suptitle(titleTxt);
+        annotation('textbox',[.1 .9 .2 .1],...
+               'string',titleTxt(:),...
+               'FitBoxToText','on',...
+               'LineStyle','none')
         saveLoc = options.saveLoc;
-        saveTifName = fullfile(saveLoc,sprintf('%s %02i.tif',options.expVar,i));
+        saveTifName = fullfile(saveLoc,sprintf('%s.tif',options.rasterFileNames{j}));
+        if ~exist(saveLoc,'dir'), mkdir(saveLoc); end
         saveas(gcf,saveTifName)
     end
+    set(0, 'DefaultFigureVisible', 'on')
 end

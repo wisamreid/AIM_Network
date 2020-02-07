@@ -23,36 +23,45 @@ addpath('..\PISPA2.0\plotting')
 addpath(genpath('..\dynasim'))
 
 % ================ parameters ==============
-expName = '003 modulate i2i inhibition';
-expVar = 'st_st gpreI2 0.02 to 0.01';
+expName = '005 modulate i-itonic singleTalker';
+% expVar = 'st_st gpreI2';
+expVar = 'i-itonic';
 expRootLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network';
 dataFolder = [expRootLoc filesep 'data' filesep expName]; %things are saved to here
 % scenario = 'consecutive';
-scenario = 'simultaneous';
+% scenario = 'simultaneous';
+scenario = 'singular';
 
-% fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\broad mode - staggered talkers 64Chan500-20000hz\CRM talker4';
-fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\simultaneous talkers 64Chan500-20000hz\CRM talker4';
 talkerSet = 20;
 
 % network parameters
 varies = struct();
 varies(1).conxn = 'I';
 varies(end).param = 'Itonic';
-varies(end).range = 0.14;
+varies(end).range = 0.18:0.005:0.22;
 
-varies(end+1).conxn = 'st->st';
-varies(end).param = 'g_preI2';
-varies(end).range = 0.02:-0.001:0.01;
+% varies(end+1).conxn = 'st->st';
+% varies(end).param = 'g_preI2';
+% varies(end).range = 0.009:-0.001:0.001;
 
+% name of raster plot files based on parameters
+% name = expVar x vary.range
+a = cellstr(num2str(varies(1).range','%.3f'));
+b = {expVar};
+[Bx,Ax] = ndgrid(1:numel(b),1:numel(a));
+rasterFileNames = strcat(b(Bx(:)),'_',a(Ax(:)))
 % =================== end ==================
+
+
 % set up directory for simulation data
 currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
-study_dir = fullfile(expRootLoc, 'run', [mfilename currentTime]);
+study_dir = fullfile(pwd, 'run', ['run' expName currentTime]);
 mkdir(fullfile(study_dir, 'solve'));
 
 % load data, structure to correct format and save to study dir
 switch scenario
     case 'consecutive'
+        fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\broad mode - staggered talkers 64Chan500-20000hz\CRM talker4';
         chans = {'00','90','-90'};
         refLabels = {'S2','S3','S1'};
         swav123 = [];
@@ -71,7 +80,18 @@ switch scenario
         fs = ic(1).data.fs;
         fcoefs = ic(1).data.fcoefs;
         cf  = ic(1).data.cf;
+    case 'singular'
+        fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\broad mode - staggered talkers 64Chan500-20000hz\CRM talker4';
+        chans = {'00'};
+        tgtwav = audioread([fileloc filesep '0_masker_set_' num2str(talkerSet) '_pos_' chans{1} 'degAz_target_conv.wav']);
+        spkData = load([fileloc filesep '0_masker_set_' num2str(talkerSet) '_pos_' chans{1} 'degAz_SpkIC.mat']);
+        spk_IC = spkTime2Train(spkData.spk_IC,spkData.fs,length(tgtwav));
+        save(fullfile(study_dir, 'solve', 'IC_spks.mat'),'spk_IC')
+        fs = spkData.fs;
+        fcoefs = spkData.fcoefs;
+        cf  = spkData.cf;
     case 'simultaneous'
+        fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network\Sims\simultaneous talkers 64Chan500-20000hz\CRM talker4';
         mixedName = ls([fileloc filesep sprintf('*set_%02i*mixed.wav',talkerSet)]);
         mixed = audioread([fileloc filesep mixedName]);
         spkName = ls([fileloc filesep sprintf('*set_%02i*SpkIC.mat',talkerSet)]);
@@ -95,7 +115,7 @@ end
 
 % run network
 options.expName = expName;
-options.expVar = expVar;
+options.rasterFileNames = rasterFileNames;
 options.saveLoc = dataFolder;
 options.plotRasters = 1;
 options.fs = fs;
