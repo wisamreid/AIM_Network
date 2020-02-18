@@ -99,8 +99,8 @@ s.connections(end).parameters={'gSYN',.2, 'tauR',0.4, 'tauD',2, 'netcon',rcNetco
 
 s.connections(end+1).direction='st->st';
 s.connections(end).mechanism_list='initI2';
-s.connections(end).parameters={'g_preI2',0.02,'nFreq',nFreqs,'simLen',simLen+200};
-
+s.connections(end).parameters={'IappI2',0.02,'nFreq',nFreqs,'simLen',simLen+200};
+% Iapp: applied current
 
 s.connections(end+1).direction='st->I';
 s.connections(end).mechanism_list='synDoubleExp';

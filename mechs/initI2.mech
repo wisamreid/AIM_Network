@@ -7,14 +7,14 @@ I2input = genI2input(nFreq,nLocs,simLen,fs);
 
 netcon=eye(N_pre,N_post)
 
-g_preI2 = 0.1
+IappI2 = 0.1
 E_exc = 0
 tauR = 1
 tauD = 3
 
 % iI2(X,t) = I2input(ceil((t+dt*0.01)/dt),:);
 
-iI2(X,t) = g_preI2 .* I2input(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc);
+iI2(X,t) = IappI2 .* I2input(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc);
 
 
 monitor iI2

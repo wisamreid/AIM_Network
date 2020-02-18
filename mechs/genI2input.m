@@ -1,6 +1,7 @@
 function out = genI2input(nFreq,nLocs,simLen,fs)
 % out = genI2input(nFreq,nLocs,simLen,fs)
-% input to I2 cells; defaulted to be on
+% input current to I2 cells; defaulted to be on
+% control current amplitude with IappI2 parameter (in initI2.mech)
 %     1 = on, 0 = off
 % I2 input should have the format of time x freqInd x location
 % output: (time)x(nFreq*nLocs)
