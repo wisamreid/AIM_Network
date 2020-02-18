@@ -1,4 +1,4 @@
-function out = genI2input(nFreq,nLocs,simLen,fs)
+function i2InputCurrent = genI2input(nFreq,nLocs,simLen,fs,study_dir)
 % out = genI2input(nFreq,nLocs,simLen,fs)
 % input current to I2 cells; defaulted to be on
 % control current amplitude with IappI2 parameter (in initI2.mech)
@@ -12,7 +12,7 @@ function out = genI2input(nFreq,nLocs,simLen,fs)
 taps = simLen;
 % dur = 1; %seconds
 
-%define when input current to I2 will be turned off and on
+% define when input current to I2 will be turned off and on
 chanSwitch = cell(1,nLocs);
 chanSwitch{1} = []; %ms
 chanSwitch{2} = [];
@@ -27,4 +27,11 @@ for i = 1:nLocs
         i2input(switchIdx(j)+1:end,:,i) = abs(i2input(switchIdx(j)+1:end,:,i)-1);
     end
 end
-out = reshape(i2input,taps,nFreq*nLocs);
+
+% define time-varying function for input current here
+% i2input(xtaps,:,loc) = some function of t
+
+% reshape to collapse dimensions
+i2InputCurrent = reshape(i2input,taps,nFreq*nLocs);
+
+save([study_dir filesep 'i2input.mat'],'i2InputCurrent')
