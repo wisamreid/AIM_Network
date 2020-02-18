@@ -1,4 +1,4 @@
-function [fs, fcoefs, cf] = prepICinput(scenario,fileloc)
+function [spk_IC, fs, fcoefs, cf] = prepICinput(scenario,talkerSet,fileloc,study_dir)
 % load data, structure to correct format and save to study dir
 
 
@@ -48,10 +48,10 @@ switch scenario
             ref(i).wav = audioread([fileloc filesep temp]);
         end
         tgt = ref(1).wav;
-
-        save(fullfile(study_dir, 'solve', 'IC_spks.mat'),'spk_IC')
-        simLen = length(spk_IC);
         fs = spks.fs;
         fcoefs = spks.fcoefs;
         cf  = spks.cf;
+        save(fullfile(study_dir, 'solve', 'IC_spks.mat'),'spk_IC')
+end
+
 end

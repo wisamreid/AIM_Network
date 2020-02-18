@@ -5,12 +5,7 @@ fs = 44100;
 
 %I2input = genI2input(nFreq,nLocs,simLen,fs);
 
-if exist('i2input.mat','file')
-    fileData = load('i2input.mat');
-else
-    fileData = load('..\i2input.mat');
-end
-I2input = fileData.i2InputCurrent;
+I2input = loadI2input();
 
 netcon=eye(N_pre,N_post)
 
