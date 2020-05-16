@@ -2,3 +2,5 @@
 *.mat
 *plots/
 *.mex*
+run/
+data/
