@@ -1,4 +1,4 @@
-function sigIn = genICinput(tauR, tauD, dt)
+function sigIn = genICinput(tauR, tauD, dt, trial)
 % input:
 %   tauR, tauD = rise and fall times of the EPSP waveform
 %   dt = sampling frequency of IC data
@@ -10,10 +10,11 @@ function sigIn = genICinput(tauR, tauD, dt)
 %
 % TODO: allow resampling of spk_IC to different dt
 
-if exist('IC_spks.mat','file')
-    fileData = load('IC_spks.mat','spk_IC');
+IC_file = sprintf('IC_spks_t%02i.mat',trial);
+if exist(IC_file,'file')
+    fileData = load(IC_file,'spk_IC');
 else
-    fileData = load('..\IC_spks.mat','spk_IC');
+    fileData = load(['..' filesep IC_file],'spk_IC');
 end
 
 if iscell(fileData.spk_IC)

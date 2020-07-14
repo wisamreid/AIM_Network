@@ -1,22 +1,25 @@
 % IC Input
 
-ICinput = genICinput(tauR, tauD, dt);
-
+trial = 1
 g_postIC = 0.1
 E_exc = 0
-tauR = 1
-tauD = 3
+tauR = 0.5
+tauD = 1.5
+Iapp = 0
+
+ICinput = genICinput(tauR, tauD, dt, trial);
 
 % f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)
 
-netcon=eye(N_pre,N_post)
+netcon=eye(N_pre,N_post);
+IappNetcon=eye(1,N_post);
 
 %iIC(X,t) = g_postIC .* sum( f( ICinput(max(1,round(t/dt)), :) ) * netcon ).*(E_exc - X);
 %iIC(X,t) = g_postIC .* f(ICinput(max(1,round(t/dt)), :)) * netcon ).*(E_exc - X);
 %iIC(X,t) = g_postIC .* f( ICinput(round(t/dt),:) ) * netcon .* (E_exc - X);
 %iIC(X,t) = g_postIC .* ICinput(round(t/dt),:) * netcon .* (E_exc - X);
 
-iIC(X,t) = g_postIC .* ICinput(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc);
+iIC(X,t) = g_postIC .* ICinput(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc) + Iapp*IappNetcon;
 
 % monitor functions
 

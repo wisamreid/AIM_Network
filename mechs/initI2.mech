@@ -1,22 +1,26 @@
-nFreq = 36;
-nLocs = 5;
+%nFreq = 36;
+%nLocs = 5;
 simLen = 76000;
 fs = 44100;
 
-%I2input = genI2input(nFreq,nLocs,simLen,fs);
-
+% I2input = genI2input(nFreq,nLocs,simLen,fs);
 I2input = loadI2input();
 
-netcon=eye(N_pre,N_post)
+defaultNetcon=eye(N_pre,N_post)
+stSubNetcon=zeros(N_pre,N_post)
 
 IappI2 = 0.1
+IappI2Varied = 0.1
 E_exc = 0
 tauR = 1
 tauD = 3
 
+netcon = (defaultNetcon-stSubNetcon).*IappI2 + stSubNetcon.*IappI2Varied;
+
+
 % iI2(X,t) = I2input(ceil((t+dt*0.01)/dt),:);
 
-iI2(X,t) = IappI2 .* I2input(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc);
+iI2(X,t) = I2input(ceil((t+dt*0.01)/dt),:) * netcon .* (X - E_exc);
 
 
 monitor iI2

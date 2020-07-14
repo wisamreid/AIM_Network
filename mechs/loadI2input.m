@@ -1,5 +1,6 @@
 function I2input = loadI2input()
 
+disp(pwd)
 if exist('i2input.mat','file')
     fileData = load('i2input.mat');
 else
