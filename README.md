@@ -7,7 +7,7 @@ This projects simulates 3 types of phenomena:
 * Functional implications of selective attention in the spatial and spectral domains
 
 ## Spatial Domain Simulations
-The script `runSpatialAtten_main.m` runs simulations offering an explanation to the observed attention-induced changes in receptive fields in the cat A1 (Lee & Middlebrooks 2003)
+The script `runSpatialAtten_main.m` runs simulations offering an explanation to the observed attention-induced changes in receptive fields in the cat A1 (Lee & Middlebrooks 2003).
 We offer three types of mechanisms to explain these observations
 * changes due to the cholinergic system
 * changes due to top-down attention
