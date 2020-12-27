@@ -1,5 +1,5 @@
-# SpatialAttentionNetwork
-A network model of selective attention in the auditory cortex, implemented in the DynaSim framework.
+# AIM Network - Attentional inhibition modulation network.
+A network model of selective attention in the auditory cortex, implemented using the DynaSim framework.
 
 This projects simulates 3 types of phenomena:
 * Selective attention in the spatial domain (Lee & Middlebrooks, 2011)
