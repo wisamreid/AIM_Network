@@ -4,4 +4,6 @@
 *.mex*
 run/
 data/
-stimuli/
+*.wav
+*.tiff
+*.pdf
