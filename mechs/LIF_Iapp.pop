@@ -1,24 +1,18 @@
+
 % Integrate and fire neurons
 % @ Kenny Chou, 2020
 %
 % change log: replaced old implementation of dV/dt, which uses g_leak and C,
 %			  with dynasim's definition, which uses R and tau
-% 20200810 added adaptation equations - need to update dV/dt still
 
 
 %%%%%%%% default parameters %%%%%%%%%%
-C = 1;              % membrane capacitance [nF]
-g_leak = 1/10;      % leak resistance [uS]
+C = 1;            % membrane capacitance [nF]
+g_leak = 1/10;     % leak resistance [uS]
 R = 1/g_leak;       % membrane resistance [Mohm]
 tau = C*R;          % membrane time constant [ms]
 E_leak = -70;       % equilibrium potential/resting potential [mV]
 noise = 0;          % noise [nA]
-
-%%%%%%%%%%%% adaptation %%%%%%%%%%%%%%
-g_ad(0) = zeros(1,N_pop);  % adaptation conductance [uS]
-G_inc = 0;                 %
-tau_ad = 175;              % ms;
-E_k = -70;                 % adaptation channel [mV]
 
 %%%%%% action potential voltages %%%%%
 V_thresh = -55;     % spike threshold [mV]
@@ -32,14 +26,11 @@ Itonic = 0;         % injected current, [nA]
 ton = 0;            % [ms]
 toff = 5000;        % [ms]
 I(t) = Itonic*(t>ton&t<toff)
+Imask = ones(1,N_pop) % targets specific neurons
 
 % voltage dynamic, spiking, refractory period
-dV/dt = ( (E_leak-V) + R*g_ad.*(E_k - V) - @isyn + R*I(t) + R*noise*randn(1,N_pop) )/tau
+dV/dt = ( (E_leak-V) - @isyn + R*I(t).*Imask + noise*randn(1,N_pop) )/tau
 V(0) = V_init;
-
-dg_ad/dt = -g_ad/tau_ad
-if(any(t==tspike,1))(g_ad = g_ad+G_inc)
-
 if(V >= V_thresh)(V = V_reset)
 if(any(t<tspike+t_ref,1))(V = V_reset)
 

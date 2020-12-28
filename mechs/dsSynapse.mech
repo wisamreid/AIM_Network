@@ -1,0 +1,8 @@
+% basic LIF synapse as defined in dynasim example
+
+gSYN=0.5; ESYN=0; tauD=2; tauR=0.4; delay=0
+netcon=eye(N_pre,N_post)
+f(x) = (exp(-x/tauD)-exp(-x/tauR)).*(x>0)
+Isyn(X) = gSYN.*(sum(f(t-tspike_pre-delay))*netcon).*(X-ESYN)
+@isyn += Isyn(V_post)
+monitor Isyn

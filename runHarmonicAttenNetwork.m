@@ -1,4 +1,4 @@
-function [data,s] = runFreqAttenNetwork(study_dir,spk_IC,varies,options)
+function [data,s] = runHarmonicAttenNetwork(study_dir,spk_IC,varies,options)
 % adopted from runSAN; originally have 64 freq channel x 5 spatial channel. 
 % Updated to only have 1 spatial channel.
 %
@@ -36,7 +36,7 @@ s.populations(end).parameters = {'noise',0};
 s.populations(end+1).name='E';
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'noise',noise};
+s.populations(end).parameters = {'noise',3};
 
 s.populations(end+1).name='C';
 s.populations(end).equations = 'chouLIF';
@@ -46,15 +46,13 @@ s.populations(end).parameters = {'noise',noise};
 s.populations(end+1).name = 'XI';
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',.03, 'noise',noise}; % 10-20 Hz spiking at rest
+s.populations(end).parameters = {'Itonic',0.5, 'noise',noise}; % 10-20 Hz spiking at rest
 % s.populations(1).parameters = {'Itonic',.01, 'noise',0.1}; % 10-20 Hz spiking at rest
 
-Imask = ones(1,nCells);
-if options.attend, Imask(options.tgtTDchan) = 0; end
 s.populations(end+1).name='TD';
-s.populations(end).equations = 'LIF_Iapp';
+s.populations(end).equations = 'chouLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',9, 'noise',0,'Imask',Imask};
+s.populations(end).parameters = {'Itonic',0, 'noise',1.5};
 
 
 %% connection mechanisms
@@ -94,38 +92,25 @@ s.mechanisms(2).equations=currentPulse;
 %% Connectivity Matrices
 ICEnetcon = eye(nFreqs);
 EInetcon = eye(nFreqs);
-TDInetcon = eye(nFreqs);
 ECnetcon = eye(nFreqs);
-EEnetcon = zeros(nFreqs);
+TDInetcon = eye(nFreqs);
+TDEnetcon = eye(nFreqs);
 
 IEnetcon = options.IEnetcon;
 ECnetcon = options.ECnetcon;
 
-% modeling synaptic gating
-tgtChan = options.tgtTDchan;
-BFChan = options.BFchan;
-EEnetcon(tgtChan,BFChan) = 1; %synaptic gating from target neuron to dendrite of BF neuron
-
-% if options.attend
-%     ECnetcon(tgtChan,BFChan) = options.tgtECgsyn; %extra connection from E to C cell
-% end
-
-%% synapses
+%% mechanisms
 s.connections(1).direction='IC->IC';
 s.connections(end).mechanism_list='IC';
-s.connections(end).parameters={'g_postIC',10,'tauR',0.5, 'tauD',1.5};
+s.connections(end).parameters={'g_postIC',1};
 
 s.connections(end+1).direction='IC->E';
 s.connections(end).mechanism_list='dsSynapse';
-s.connections(end).parameters={'gSYN',3,'tauR',0.4, 'tauD',2, 'netcon',ICEnetcon}; 
-
-s.connections(end+1).direction='E->E';
-s.connections(end).mechanism_list='dsSynapse';
-s.connections(end).parameters={'gSYN',0,'tauR',0.4, 'tauD',2,'netcon',EEnetcon}; 
+s.connections(end).parameters={'gSYN',3,'tauR',0.3, 'tauD',1.5, 'netcon',ICEnetcon}; 
 
 s.connections(end+1).direction='E->XI';
 s.connections(end).mechanism_list='dsSynapse';
-s.connections(end).parameters={'gSYN',3, 'tauR',0.4, 'tauD',2, 'netcon',EInetcon}; 
+s.connections(end).parameters={'gSYN',3, 'tauR',0.3, 'tauD',1.5, 'netcon',EInetcon}; 
 
 s.connections(end+1).direction='XI->E';
 s.connections(end).mechanism_list='dsSynapse';
@@ -134,14 +119,15 @@ s.connections(end).parameters={'gSYN',3, 'tauR',1, 'tauD',10, 'netcon',IEnetcon,
 
 s.connections(end+1).direction='E->C';
 s.connections(end).mechanism_list='dsSynapse';
-s.connections(end).parameters={'gSYN',3, 'tauR',0.4, 'tauD',2, 'netcon',ECnetcon}; 
+s.connections(end).parameters={'gSYN',3, 'tauR',0.3, 'tauD',1.5, 'netcon',ECnetcon}; 
 
-% s.connections(end+1).direction='TD->TD';
-% s.connections(end).mechanism_list='initI2';
-% s.connections(end).parameters={'IappI2',1,'IappI2Varied',0.005,'stSubNetcon',stFreqChanTargetNetcon,'simLen',simLen+200};
+s.connections(end+1).direction='TD->TD';
+s.connections(end).mechanism_list='initI2';
+s.connections(end).parameters={'IappI2',0.5};
 % Iapp: current applied to all TD neurons;
 % IappI2Varied: current applied to specific neurons; 
 %               needs to be used in conjunction with stSubNetcon.
+% stSubNetcon: specifies specific neurons to target.
 
 s.connections(end+1).direction='TD->XI';
 s.connections(end).mechanism_list='dsSynapse';
@@ -149,7 +135,7 @@ s.connections(end).parameters={'gSYN',3, 'tauR',1, 'tauD',10, 'netcon',TDInetcon
 
 s.connections(end+1).direction='TD->E';
 s.connections(end).mechanism_list='dsSynapse';
-s.connections(end).parameters={'gSYN',0.8, 'tauR',1, 'tauD',10, 'netcon',TDInetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',0.8, 'tauR',1, 'tauD',10, 'netcon',TDEnetcon, 'ESYN',-80}; 
 
 if options.vizNetwork, vizNetwork(s); end
 %% vary
@@ -168,7 +154,7 @@ compile_flag = 0;
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',1, 'save_results_flag',1,...
   'study_dir',study_dir, 'debug_flag',0, 'vary',vary, 'verbose_flag',0,...
-  'mex_flag',1,'parfor_flag',parfor_flag,'compile_flag',compile_flag);
+  'parfor_flag',parfor_flag,'compile_flag',compile_flag);
 toc
 
 %% insert spikes
@@ -182,8 +168,8 @@ end
 
 %% plot each population of cells
 if options.plotRasters
-    set(0, 'DefaultFigureVisible', 'off')
-    figure('position',[500 100 700 850]);
+%     set(0, 'DefaultFigureVisible', 'off')
+    figure;
     time_end = floor(simLen/fs*1000);
     pops = {data(1).model.specification.populations.name};
     fieldNames = strcat(pops,'_V_spikes');
@@ -198,7 +184,7 @@ if options.plotRasters
             ypos = 0.9-imgHeight*(length(pops)+1-i);
             subplot('position',[0.1 ypos 0.6 imgHeight]);
             plotSpikeRasterFs(spikes, 'PlotType','vertline', 'Fs',fs);
-            xlim([0 time_end])
+            xlim([0 time_end+200])
             ylabel(popName)
             xticks([])
             
@@ -217,7 +203,7 @@ if options.plotRasters
         ypos = 0.9-imgHeight*(length(pops)+1);
         subplot('position',[0.1 ypos 0.6 imgHeight]);
         plotSpikeRasterFs(icSpikes, 'PlotType','vertline', 'Fs',fs);
-        xlim([0 time_end])
+        xlim([0 time_end+200])
         ylabel('IC model spks')
         yticks(1:axisInc:nCells)
         yticklabels(round(options.cf(1:axisInc:nCells)/1000,1))
@@ -226,9 +212,9 @@ if options.plotRasters
         subplot('position',[0.755 0.1 0.2 0.875])
         plot(sum(icSpikes,2),1:nCells); hold on;
         hl = legend([pops,'IC']);
-        hl.Location = 'southeast';
+        hl.Location = 'best';
         yticks(1:axisInc:nCells)
-        yticklabels(round(options.cf(1:axisInc:nCells)/1000,1))
+        yticklabels(round(options.cf(1:8:nCells)/1000,1))
         ylabel('CF (kHz)')
         xlabel('spike count')
         title('PSTH')
@@ -252,7 +238,7 @@ if options.plotRasters
         if ~exist(saveLoc,'dir'), mkdir(saveLoc); end
         saveas(gcf,saveTifName)
     end
-    set(0, 'DefaultFigureVisible', 'on')
+%     set(0, 'DefaultFigureVisible', 'on')
 end
 
 end

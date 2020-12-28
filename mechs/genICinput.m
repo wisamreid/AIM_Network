@@ -9,6 +9,8 @@ function sigIn = genICinput(tauR, tauD, dt, trial)
 % Boston Univeristy, 2019
 %
 % TODO: allow resampling of spk_IC to different dt
+% commented out the EPSP waveform; so the input to the IC mechanism is a
+% series of spike trians, which acts as current pulses.
 
 IC_file = sprintf('IC_spks_t%02i.mat',trial);
 if exist(IC_file,'file')
@@ -38,13 +40,17 @@ sigIn = reshape(spk_IC,timeLen,nfreqs*nlocs);
 
 % ========================= create EPSP waveform =========================
 % ============= convolve each time series with epsc waveform ==============
-t_a = max(tauR,tauD)*7; % Max duration of syn conductance
-t_vec = 0:dt:t_a;
-tau2 = tauR;
-tau1 = tauD;
-tau_rise = tau1*tau2/(tau1-tau2);
-b = ((tau2/tau1)^(tau_rise/tau1) - (tau2/tau1)^(tau_rise/tau2)^-1); % /tau2?
-epsc =  - b * ( exp(-t_vec/tau1) - exp(-t_vec/tau2) ); % - to make positive
-sigIn = conv2(sigIn,epsc','same');
+% t_a = max(tauR,tauD)*7; % Max duration of syn conductance
+% t_vec = 0:dt:t_a;
+% tau2 = tauR;
+% tau1 = tauD;
+% tau_rise = tau1*tau2/(tau1-tau2);
+% b = ((tau2/tau1)^(tau_rise/tau1) - (tau2/tau1)^(tau_rise/tau2)^-1); % /tau2?
+% epsc =  - b * ( exp(-t_vec/tau1) - exp(-t_vec/tau2) ); % - to make positive
+
+dur = 0.5; %ms
+epsc = ones(1, round(dur/dt));
+sigIn = conv2(sigIn,epsc');
+sigIn(size(spk_IC,1)+1:end,:) = []; %trim off extras
 
 end

@@ -1,0 +1,32 @@
+% synaptic current calculation
+% @ Kenny Chou, 2020
+
+% default parameters
+gSYN = 1; 
+ESYN = 0; 
+tauR = 0.5;
+tauD = 0.44; %0.8929; 
+delay = 0;
+netcon = ones(N_pre,N_post);
+
+% EPSP waveforms
+epsp(t) = (1/tauD)*t.*(exp(1-t/tauD)).*(t>0)       % alpha function
+% epsp(t) = (exp(-t/tauD)).*(t>0)                    % single exponential
+
+%% double exponential
+%tau1 = tauD;
+%tau2 = tauR;
+%tau_rise = tau1*tau2/(tau1-tau2);                    
+%b = ((tau2/tau1)^(tau_rise/tau1) - (tau2/tau1)^(tau_rise/tau2)^-1);
+%epsp(t) =  - b * ( exp(-t/tau1) - exp(-t/tau2) );
+
+% Channel opening probability
+tau = tauR*tauD/(tauR+tauD)
+p' = sum((epsp(t-tspike_pre-delay)-p))/tau      % sum() will not work if t-spike buffer is < 2
+p(0) = 0
+
+I(X,t) = gSYN .* p * netcon .*(X - ESYN)
+%I(X,t) = gSYN .* sum(epsp(t-tspike_pre-delay),2) * netcon .*(X - ESYN) %nope
+@isyn += I(V_post,t)
+
+monitor functions
