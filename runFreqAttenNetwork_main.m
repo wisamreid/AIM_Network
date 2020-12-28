@@ -31,6 +31,7 @@
 pathCell = regexp(path,pathsep,'split');
 if any(strcmpi('BOSSA',pathCell)), rmpath(genpath('../BOSSA')); end
 addpath('mechs')
+addpath('network_params')
 addpath('util')
 addpath('util\plotting')
 addpath('util\eval_scripts')
