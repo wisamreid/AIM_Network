@@ -36,3 +36,13 @@ See description in the script for more information.
 We also simulated functional uses for the AIM network:
 * `runSpatialAttenApplication_main.m` simulates attending to a specific location in space
 * `runHarmonicAttenNetwork_main.m` simulates attending to harmonics of a speaker's f0
+
+## Changing the network structure and parameters
+Network parameters are stored in the `/network_params` directory. Within these files, you can specify 
+* whether attention is engaged
+* attended frequency or location
+* the "best" frequency of the network/neuron
+
+Update the network parameters by changing the `varies` structure. The `varies` structures contains triplets of `{neurons or connections, parameter to change, parameter value}`. The runNetwork file then unpacks this structure into a format used by DynaSim.
+
+You can also update the network connections by adjusting the connectivity matrix between neuron populations. The matrix is usually a binary matrix where each row represents the pre-synaptic neurons and each column represents the post-synaptic neurons. e.g., for three neurons to all converge into a single post-synaptic neuron, we'd use a 3x1 matrix of ones. To remove the connection of the 2nd presynaptic neuron, we'd use this netcon matrix - `[1;0;1]`
