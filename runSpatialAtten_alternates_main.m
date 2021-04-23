@@ -30,6 +30,10 @@ study_dir = fullfile(pwd, 'run', ['run WGN-' currentTime]);
 mkdir(fullfile(study_dir, 'solve'));
 
 % -------------------- input information ---------------------
+% this simulation uses white gaussian noise, spatialized to originate from 
+% the specified locations. The inputs here are model neuron responses to
+% white gaussian noise from those locations.
+% ------------------------------------------------------------
 frReduce = [];
 sourceLocIdxs = 1:length(sourceLocs);
 % sourceLocIdxs = randperm(length(sourceLocs))
@@ -41,7 +45,8 @@ for sourceLocIdx = sourceLocIdxs
     spkTrains = spkTime2Train(stim.spk_IC,fs,stimDur);
     spkTrains = spkTrains(1:stimDur,:,:);
     
-    % calculate fr & reduce dimension
+    % calculate fr & reduce dimension - here I collapse the inputs across 
+    % the frequency dimension to reduce the simulation size.
     nAz = length(stim.azList);
     win = ones(0.050*fs,1); %50 ms windows
     fr = zeros(stimDur,length(stim.cf),nAz);
@@ -63,7 +68,8 @@ azListReduced = stim.azList(1:2:end);
 % plotSpikeRasterFs(logical(newTrainReduced)','PlotType','vertline', 'Fs',fs);
 % xlim([0 200*length(sourceLocs)])
     
-% save modified input
+% save modified input. The input must be saved to this folder in order
+% for the network to read it.
 spk_IC = [zeros(2000,length(azListReduced)); newTrainReduced];
 save([study_dir filesep 'solve' filesep sprintf('IC_spks_t%02i.mat',1)],'spk_IC');
 

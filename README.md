@@ -1,5 +1,5 @@
 # AIM Network - Attentional inhibition modulation network.
-A network model of selective attention in the auditory cortex, implemented using the DynaSim framework.
+A network model of selective attention in the auditory cortex, implemented using the [DynaSim framework](https://github.com/DynaSim/DynaSim).
 This repo accompanies our [preprint on bioRxiv](https://www.biorxiv.org/content/10.1101/2020.12.10.419762v1.abstract).
 
 This project simulates the tuning curves changes of the A1 due to selective attention in several scenarios:
@@ -34,5 +34,5 @@ See description in the script for more information.
 
 ## Functional Simulations
 We also simulated functional uses for the AIM network:
-* `runSpatialAttenApplication_main.m` simulates spatial attention
+* `runSpatialAttenApplication_main.m` simulates attending to a specific location in space
 * `runHarmonicAttenNetwork_main.m` simulates attending to harmonics of a speaker's f0
