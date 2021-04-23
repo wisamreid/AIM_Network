@@ -37,7 +37,7 @@ We also simulated functional uses for the AIM network:
 * `runSpatialAttenApplication_main.m` simulates attending to a specific location in space
 * `runHarmonicAttenNetwork_main.m` simulates attending to harmonics of a speaker's f0
 
-## Changing the network structure and parameters
+## Changing network structure and parameters
 Network parameters are stored in the `/network_params` directory. Within these files, you can specify 
 * whether attention is engaged
 * attended frequency or location
