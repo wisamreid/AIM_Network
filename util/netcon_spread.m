@@ -1,6 +1,6 @@
 function h = netcon_spread(x,bw,type,f0Shift)
 % returns netcon matrix H, where each frequency channel in X has a spread
-% of BW octaves or BW kHz
+% of BW octaves
 %   x - frequency axis vector, in kHz. Center frequencies of each channel.
 %   bw - bandwidth in octaves
 %   type - 'q' for constant Q, or 'bw' for constant bandwidth
