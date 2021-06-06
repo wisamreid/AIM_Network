@@ -25,7 +25,7 @@ addpath(genpath('..\dynasim'))
 clear options ICEsmall varies
 
 % stimuli information  - update these!!
-wgnDir = 'C:\Users\Kenny\Desktop\GitHub\SpatialAttentionNetwork\stimuli\WGNs';
+wgnDir = 'AIM_Network\stimuli\WGNs';
 sourceLocs = [-80:10:80];
 fs = 40000;
 stimDur = 0.08*fs; %cap stimulus duration to this length

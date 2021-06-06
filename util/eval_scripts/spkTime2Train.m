@@ -7,7 +7,9 @@ function spks = spkTime2Train(spkTime,fs,timeLen)
 %   timeLen = length of time vector. Optional
 
 if ~exist('timeLen','var')
-    nTime = max(max(cellfun(@max,spkTime)))*fs; %find max time vector length
+    maxTimesPerFreq = cell2mat(cellfun(@max,spkTime,'UniformOutput',false));
+    nTime = max(max(maxTimesPerFreq))*fs; %find max time vector length
+
     nTime = round(nTime);
 else
     nTime = timeLen;
