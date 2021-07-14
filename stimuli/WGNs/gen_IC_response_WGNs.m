@@ -1,4 +1,6 @@
-% use BOSSA to create IC spikes, as the input to the AIM network
+% This script creates the stimuli & pre-cortical responses for the
+% middlebrooks simulation. It uses BOSSA to create IC spikes from the 
+% spatialized WGNs.
 
 % path of BOSSA
 bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
@@ -8,6 +10,12 @@ addpath([bossapath filesep 'recon'])
 addpath([bossapath filesep 'HRTF'])
 addpath([bossapath filesep 'ObjectiveMeasure'])
 
+% data storage location
+saveLoc = 'C:\Users\Kenny\Desktop\GitHub\SpatialAttentionNetwork\stimuli\WGNs\';
+if ~exist(saveLoc,'dir')
+    mkdir(saveLoc);
+end
+    
 % define stimuli
 rmsGain = 150;
 stimuliLoc = [-80:10:80]; %match loudspeaker locations
@@ -41,8 +49,6 @@ for i = 1:length(stimuliLoc)
     s_filt = struct();
     s_filt.sL=ERBFilterBank(WGNL(:,i),fcoefs); %freq*time
     s_filt.sR=ERBFilterBank(WGNR(:,i),fcoefs);
-%     s_filt.sL = WGNL(:,i)';
-%     s_filt.sR = WGNR(:,i)';
     s_filt.band = 'narrow';
     s_filt.BW = bw;
     s_filt.flist = cf;
@@ -58,10 +64,6 @@ for i = 1:length(stimuliLoc)
     [spks(i).spk_IC, spks(i).FR] = ICmodel(s_filt,azList,randomness);
     toc
     
-    saveLoc = 'C:\Users\Kenny\Desktop\GitHub\SpatialAttentionNetwork\stimuli\WGNs\';
-    if ~exist(saveLoc,'dir')
-        mkdir(saveLoc);
-    end
     spk_IC = spks(i).spk_IC;
     FR = spks(i).FR;
     saveName = sprintf('Spatial Tuning SingleWGN Position %02i.mat',stimuliLoc(i));
