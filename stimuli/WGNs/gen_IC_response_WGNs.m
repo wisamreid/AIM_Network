@@ -3,7 +3,10 @@
 % spatialized WGNs.
 
 % path of BOSSA
-bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+
+%bossapath = ('C:/Users/Kenny/Desktop/GitHub/BOSSA');
+bossapath = '../BOSSA';
+addpath(bossapath);
 addpath([bossapath filesep 'peripheral'])
 addpath([bossapath filesep 'IC'])
 addpath([bossapath filesep 'recon'])
@@ -11,7 +14,7 @@ addpath([bossapath filesep 'HRTF'])
 addpath([bossapath filesep 'ObjectiveMeasure'])
 
 % data storage location
-saveLoc = 'C:\Users\Kenny\Desktop\GitHub\SpatialAttentionNetwork\stimuli\WGNs\';
+saveLoc = '../AIM_network/stimuli/WGNs/';
 if ~exist(saveLoc,'dir')
     mkdir(saveLoc);
 end
@@ -61,7 +64,7 @@ for i = 1:length(stimuliLoc)
     randomness = 1;
     tic
     azList = [-90:5:90]; %model neuron locations
-    [spks(i).spk_IC, spks(i).FR] = ICmodel(s_filt,azList,randomness);
+    [spks(i).spk_IC, spks(i).FR] = ICmodel(s_filt,azList,randomness,bossapath);
     toc
     
     spk_IC = spks(i).spk_IC;

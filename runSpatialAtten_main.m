@@ -14,18 +14,21 @@
 % 20200928 - concatenated inputs spikes from various sources into one long
 %            stimulus to reduce the number of simulations required
 % set up paths
+
 pathCell = regexp(path,pathsep,'split');
+
 if any(strcmpi('BOSSA',pathCell)), rmpath(genpath('../BOSSA')); end
 addpath('dependencies')
 addpath('mechs')
 addpath('util')
-addpath('util\plotting')
-addpath('util\eval_scripts')
-addpath(genpath('..\dynasim'))
+addpath('util/plotting')
+addpath('util/eval_scripts')
+addpath('network_params')
+addpath(genpath('../dynasim'))
 clear options ICEsmall varies
 
 % stimuli information  - update these!!
-wgnDir = 'AIM_Network\stimuli\WGNs';
+wgnDir = [cd '/stimuli/WGNs'];
 sourceLocs = [-80:10:80];
 fs = 40000;
 stimDur = 0.08*fs; %cap stimulus duration to this length
@@ -46,7 +49,8 @@ sourceLocIdxs = 1:length(sourceLocs);
 for sourceLocIdx = sourceLocIdxs%1:length(sourceLocs)
     % prep/copy input spikes
     spkFile = ls([wgnDir filesep sprintf('*Position %02i.mat',sourceLocs(sourceLocIdx))]);
-    stim = load([wgnDir filesep spkFile]);
+    spkFile = erase(spkFile,newline);
+    stim = load(spkFile);
     fs = stim.fs;
     spkTrains = spkTime2Train(stim.spk_IC,fs,stimDur);
     spkTrains = spkTrains(1:stimDur,:,:);
@@ -101,7 +105,7 @@ rasterFileNames = strcat(b(Bx(:)),'_',a(Ax(:)));
 expRootLoc = pwd;
 expPrefix = '048 Middlebrooks cho v inh';
 expName = [expPrefix ' Varying ' expVar];
-dataFolder = [expRootLoc filesep 'data' filesep expName]; %things are saved to here\
+dataFolder = [expRootLoc filesep 'data' filesep expName]; %things are saved to here/
 
 % % % customized Imask for attending to different stimulus locations
 % % Imask = ones(size(spk_IC));
