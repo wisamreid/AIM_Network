@@ -33,9 +33,10 @@ if any(strcmpi('BOSSA',pathCell)), rmpath(genpath('../BOSSA')); end
 addpath('mechs')
 addpath('network_params')
 addpath('util')
-addpath('util\plotting')
-addpath('util\eval_scripts')
-addpath(genpath('..\dynasim'))
+addpath('util/plotting')
+addpath('util/eval_scripts')
+addpath(genpath('../dynasim'))
+clear datetime
 
 % ========= load experiment parameters ===========%
 expPrefix = '043'; %for logging results
@@ -75,13 +76,13 @@ b = {expVar};
 rasterFileNames = strcat(b(Bx(:)),'_',a(Ax(:)))
     
 % set up directory for simulation data
-currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
+currentTime = char(datetime('now','Format','yyyyMMdd-HHmmss'));
 study_dir = fullfile(pwd, 'run', ['run' expName currentTime]);
 mkdir(fullfile(study_dir, 'solve'));
 
 expFolderName = sprintf('%s_%s_Attend%i',expPrefix,expName,attention);
 expRootLoc = pwd; %'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network';
-dataFolder = [expRootLoc filesep 'data' filesep expFolderName]; %things are saved to here
+dataFolder = fullfile(expRootLoc,'data',expFolderName); %things are saved to here
 
 % prep IC inputs
 % ------------ load spk_IC here -----------------

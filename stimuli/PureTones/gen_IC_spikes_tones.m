@@ -1,7 +1,8 @@
 % use BOSSA to create IC spikes, as the input to the AIM network
 
 % path of BOSSA
-bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+% bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+bossapath = fullfile('..','BOSSA');
 addpath([bossapath filesep 'peripheral'])
 addpath([bossapath filesep 'IC'])
 addpath([bossapath filesep 'HRTF'])
@@ -22,7 +23,8 @@ end
 imagesc((1:length(t))/fs,f0,tones)
 
 % HRTFs
-hrtfpath = 'C:\Users\Kenny\Desktop\GitHub\BOSSA\HRTF';
+% hrtfpath = 'C:\Users\Kenny\Desktop\GitHub\BOSSA\HRTF';
+hrtfpath = fullfile(bossapath,'HTRF');
 talker_azs = 0;
 numtalkers = length(talker_azs);
 for i = 1:numtalkers

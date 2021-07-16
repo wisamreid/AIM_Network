@@ -16,7 +16,7 @@ IC_file = sprintf('IC_spks_t%02i.mat',trial);
 if exist(IC_file,'file')
     fileData = load(IC_file,'spk_IC');
 else
-    fileData = load(['..' filesep IC_file],'spk_IC');
+    fileData = load(fullfile('..',IC_file),'spk_IC');
 end
 
 if iscell(fileData.spk_IC)

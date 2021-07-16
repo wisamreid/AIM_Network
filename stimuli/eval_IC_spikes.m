@@ -4,7 +4,8 @@
 %   wavs
 %   fcoefs
 addpath('eval_scripts')
-addpath('C:\Users\Kenny\Desktop\GitHub\BOSSA\Plotting')
+% addpath('C:\Users\Kenny\Desktop\GitHub\BOSSA\Plotting')
+addpath(fullfile('..','BOSSA','Plotting'))
 
 numTalkers = 2;
 % calculate NCC

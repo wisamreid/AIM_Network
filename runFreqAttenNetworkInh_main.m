@@ -33,9 +33,10 @@ if any(strcmpi('BOSSA',pathCell)), rmpath(genpath('../BOSSA')); end
 addpath('mechs')
 addpath('network_params')
 addpath('util')
-addpath('util\plotting')
-addpath('util\eval_scripts')
-addpath(genpath('..\dynasim'))
+addpath('util/plotting')
+addpath('util/eval_scripts')
+addpath(genpath('../dynasim'))
+clear datetime
 
 % ========= load experiment parameters ===========%
 expPrefix = '053g EE0'; %for logging results
@@ -69,18 +70,18 @@ b = {expVar};
 rasterFileNames = strcat(b(Bx(:)),'_',a(Ax(:)))
     
 % set up directory for simulation data
-currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
+currentTime = char(datetime('now','Format','yyyyMMdd-HHmmss'));
 study_dir = fullfile(pwd, 'run', ['run' expName currentTime]);
 mkdir(fullfile(study_dir, 'solve'));
 
 expFolderName = sprintf('%s_%s_Attend%i',expPrefix,expName,attention);
 expRootLoc = pwd; %'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\Top-Down AIM network';
-dataFolder = [expRootLoc filesep 'data' filesep expFolderName]; %things are saved to here
+dataFolder = fullfile(expRootLoc,'data',expFolderName); %things are saved to here
 
 % prep IC inputs
 % ------------ load spk_IC here -----------------
 for trial = trials
-    spks = load([stimuliRoot filesep sprintf('IC_spks_tones_%02i.mat',trial)]);
+    spks = load(fullfile(stimuliRoot,sprintf('IC_spks_tones_%02i.mat',trial)));
     spk_IC = spkTime2Train(spks.spk_IC,spks.fs,0.3*fs);
     spk_IC = squeeze(spk_IC(:,:,3));
     spk_IC(1:400,:) = 0; %remove artifact & have a silent period

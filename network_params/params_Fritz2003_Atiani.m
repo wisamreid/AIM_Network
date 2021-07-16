@@ -1,7 +1,7 @@
 % Fritz et al. 2003 parameters
 
 % stimuli path
-stimuliRoot = 'stimuli\PureTones\256chan 0.2-16khz rms15\';
+stimuliRoot = fullfile('stimuli','PureTones','256chan 0.2-16khz rms15');
 
 %peripheral filter parameters
 low_freq = 200; %min freq of the filter

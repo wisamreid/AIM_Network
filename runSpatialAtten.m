@@ -83,7 +83,7 @@ IEnetcon = extendAndRegroup(IEsmall,nFreqs,nLocs);
 
 %% mechanisms
 s.connections(1).direction='IC->IC';
-s.connections(end).mechanism_list='IC';
+s.connections(end).mechanism_list='IC_input';
 s.connections(end).parameters={'g_postIC',10,'tauR',0.5, 'tauD',1.5};
 
 s.connections(end+1).direction='IC->E';

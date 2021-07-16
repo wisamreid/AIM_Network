@@ -1,7 +1,7 @@
 % use BOSSA to create IC spikes, as the input to the AIM network
 
 % path of BOSSA
-bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+bossapath = fullfile('..','BOSSA');
 addpath([bossapath filesep 'peripheral'])
 addpath([bossapath filesep 'IC'])
 addpath([bossapath filesep 'recon'])
