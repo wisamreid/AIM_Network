@@ -3,7 +3,8 @@
 % BOSSA needs to have "best ILDs & best ITDs" = 0 for all frequencies.
 
 % path of BOSSA
-bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+% bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+bossapath = fullfile('..','BOSSA');
 addpath([bossapath filesep 'peripheral'])
 addpath([bossapath filesep 'IC'])
 addpath([bossapath filesep 'HRTF'])
@@ -36,7 +37,8 @@ tones = [tones zeros(size(tones))];
 % imagesc((1:length(t))/fs,f0,tones)
 
 % HRTFs
-hrtfpath = 'C:\Users\Kenny\Desktop\GitHub\BOSSA\HRTF';
+% hrtfpath = 'C:\Users\Kenny\Desktop\GitHub\BOSSA\HRTF';
+hrtfpath = fullfile(bossapath,'HTRF');
 talker_azs = 0;
 numtalkers = length(talker_azs);
 for i = 1:numtalkers
@@ -112,7 +114,8 @@ for i = 1:size(tones,1)
 end
 
 %% plot IC response to all stimuli
-stimuliRoot = 'C:\Users\Kenny\Desktop\GitHub\SpatialAttentionNetwork\stimuli\PureTones';
+% stimuliRoot = 'C:\Users\Kenny\Desktop\GitHub\SpatialAttentionNetwork\stimuli\PureTones';
+stimuliRoot = fullfile('AIM_network','stimuli','PureTones');
 total = [];
 for trial = 1:numTrials
     spks = load([stimuliRoot filesep sprintf('IC_spks_tones_%02i.mat',trial)]);

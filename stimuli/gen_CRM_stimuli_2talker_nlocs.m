@@ -4,8 +4,8 @@
 % 2021-05-18
 
 % paths
-crmpath = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\toolboxes\CRM';
-hrtfpath = 'C:\Users\Kenny\Desktop\GitHub\BOSSA\HRTF_40k';
+crmpath = fullfile('..','CRM');
+hrtfpath = fullfile('..','BOSSA','HRTF_40k');
 addpath(crmpath);
 
 % names of CRM files
@@ -59,5 +59,5 @@ for i = 2:20
         wavs.(['mixed' num2str(talker2az(j))]) = [sentencesL(:,1)+sentencesL(:,j+1),...
                                                      sentencesR(:,1)+sentencesR(:,j+1)];
     end
-    save(['stimuli' filesep 'CRM Stimuli TM Xdeg' filesep 'set' num2str(i,'%02i') '.mat'],'wavs','talker_azs','talker1','talker2','fs');
+    save(fullfile('stimuli','CRM Stimuli TM Xdeg','set' num2str(i,'%02i') '.mat'),'wavs','talker_azs','talker1','talker2','fs');
 end

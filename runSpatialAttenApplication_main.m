@@ -8,15 +8,15 @@ if any(strcmpi('BOSSA',pathCell)), rmpath(genpath('../BOSSA')); end
 addpath('mechs')
 addpath('network_params')
 addpath('util')
-addpath('util\plotting')
-addpath('util\eval_scripts')
-addpath(genpath('..\dynasim'))
+addpath('util/plotting')
+addpath('util/eval_scripts')
+addpath(genpath('../dynasim'))
 
 % =============== folders and paths ==============
 % stimuliRoot = 'stimuli\CRM MF 90deg separated';
 % stimuliRoot = 'stimuli\CRM MF 90deg separated sequential';
 % stimuliRoot = 'stimuli\CRM MF Xdeg separated';
-stimuliRoot = 'stimuli\CRM MF 0deg colocated';
+stimuliRoot = 'stimuli/CRM MF 0deg colocated';
 expPrefix = '052';
 expName = sprintf('%s_SpatialAttendDemo_colocated',expPrefix);
 expRootLoc = pwd; 
@@ -99,7 +99,7 @@ for attendAz = attendAzs
 
 
         % set up directory for simulation data
-        currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
+        currentTime = char(datetime('now','Format','yyyyMMdd-HHmmss'));
         study_dir = fullfile(pwd, 'run', ['run' expName currentTime]);
         mkdir(fullfile(study_dir, 'solve'));
 

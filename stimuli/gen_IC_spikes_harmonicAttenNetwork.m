@@ -1,7 +1,7 @@
 % use BOSSA to create IC spikes, as the input to the AIM network
 
 % path of BOSSA
-bossapath = ('C:\Users\Kenny\Desktop\GitHub\BOSSA');
+bossapath = fullfile('..','BOSSA');
 addpath([bossapath filesep 'peripheral'])
 addpath([bossapath filesep 'IC'])
 addpath([bossapath filesep 'recon'])
@@ -10,7 +10,7 @@ addpath([bossapath filesep 'ObjectiveMeasure'])
 addpath([bossapath filesep 'Plotting'])
 
 % load stimuli files
-load('Stimuli/CRM Stimuli TM 0deg.mat','wavs');
+load(fullfile('Stimuli','CRM Stimuli TM 0deg.mat'),'wavs');
 
 ICrms = 150; %input gain
 data = struct();
@@ -57,7 +57,7 @@ for i = speakerSet
     toc
 
     % save spikes
-    save(sprintf('CRM MF 0deg colocated\\IC_spks_0DegMF_Set_%02i.mat',i),'spk_IC','fcoefs','fs');
+    save(sprintf('CRM MF 0deg colocated%sIC_spks_0DegMF_Set_%02i.mat',filesep,i),'spk_IC','fcoefs','fs');
 end
 
 %% debug/evaluate

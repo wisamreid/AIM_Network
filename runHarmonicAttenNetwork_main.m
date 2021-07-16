@@ -14,13 +14,13 @@ if any(strcmpi('BOSSA',pathCell)), rmpath(genpath('../BOSSA')); end
 addpath('mechs')
 addpath('network_params')
 addpath('util')
-addpath('util\plotting')
-addpath('util\eval_scripts')
-addpath(genpath('..\dynasim'))
+addpath('util/plotting')
+addpath('util/eval_scripts')
+addpath(genpath('../dynasim'))
 
 % =============== folders and paths ==============
 % for logging results
-stimuliRoot = 'stimuli\CRM MF 0deg colocated';
+stimuliRoot = fullfile('stimuli','CRM MF 0deg colocated');
 expPrefix = '041a';
 expName = sprintf('%s_harmonics_AtianiNetwork',expPrefix);
 expRootLoc = pwd;
@@ -47,8 +47,8 @@ for trials = 20
         % ===== f0 information =====
         pitch.winLen = fs*0.0522;
         pitch.noverlap = fs*(0.042);
-        Fdata = load(sprintf('stimuli\\CRM_pitchData\\F%i.mat',trials),'data'); %attend female
-        Mdata = load(sprintf('stimuli\\CRM_pitchData\\M%i.mat',trials),'data'); % attend male
+        Fdata = load(sprintf('stimuli%sCRM_pitchData%sF%i.mat',filesep,filesep,trials),'data'); %attend female
+        Mdata = load(sprintf('stimuli%sCRM_pitchData%sM%i.mat',filesep,filesep,trials),'data'); % attend male
         IE_BWs = ones(1,20)*0.17;
         IE_BWs([3,4,5,7,8,10,15,19]) = 0.25;
         IE_BWs(3) = 0.3;
@@ -162,7 +162,7 @@ for trials = 20
         % =================== end params ==================
 
         % set up directory for simulation data
-        currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
+        currentTime = char(datetime('now','Format','yyyyMMdd-HHmmss'));
         study_dir = fullfile(pwd, 'run', ['run' expName currentTime]);
         mkdir(fullfile(study_dir, 'solve'));
 
@@ -265,8 +265,8 @@ colorF = [205, 19, 69]/255;
 for trial = 1:20
     spkCntTracker = [];
     load([dataFolder filesep sprintf('ICspks_t%02i.mat',trial)],'spk_IC');
-    Fdata = load(sprintf('stimuli\\CRM_pitchData\\F%i.mat',trial),'data'); %attend female
-    Mdata = load(sprintf('stimuli\\CRM_pitchData\\M%i.mat',trial),'data'); %attend male
+    Fdata = load(sprintf('stimuli%sCRM_pitchData%sF%i.mat',filesep,filesep,trial),'data'); %attend female
+    Mdata = load(sprintf('stimuli%sCRM_pitchData%sM%i.mat',filesep,filesep,trial),'data'); %attend male
     
     for AttendTarget = {'M','F'}
     %rasters

@@ -25,7 +25,7 @@ addpath('util/plotting')
 addpath('util/eval_scripts')
 addpath('network_params')
 addpath(genpath('../dynasim'))
-clear options ICEsmall varies
+clear options ICEsmall varies datetime
 
 % stimuli information  - update these!!
 wgnDir = [cd '/stimuli/WGNs'];
@@ -37,7 +37,7 @@ attend = 1; %
 mech = 'both'; % 'inh','cho', or 'both'
 
 % study directory
-currentTime = char(datetime('now','Format','yyyyMMdd''-''HHmmss'));
+currentTime = char(datetime('now','Format','yyyyMMdd-HHmmss'));
 study_dir = fullfile(pwd, 'run', ['run WGN-' currentTime]);
 mkdir(fullfile(study_dir, 'solve'));
 

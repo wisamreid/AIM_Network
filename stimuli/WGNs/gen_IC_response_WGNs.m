@@ -5,7 +5,7 @@
 % path of BOSSA
 
 %bossapath = ('C:/Users/Kenny/Desktop/GitHub/BOSSA');
-bossapath = '../BOSSA';
+bossapath = ['..' filesep 'BOSSA'];
 addpath(bossapath);
 addpath([bossapath filesep 'peripheral'])
 addpath([bossapath filesep 'IC'])
@@ -14,7 +14,7 @@ addpath([bossapath filesep 'HRTF'])
 addpath([bossapath filesep 'ObjectiveMeasure'])
 
 % data storage location
-saveLoc = '../AIM_network/stimuli/WGNs/';
+saveLoc = fullfile('..','AIM_network','stimuli','WGNs');
 if ~exist(saveLoc,'dir')
     mkdir(saveLoc);
 end
