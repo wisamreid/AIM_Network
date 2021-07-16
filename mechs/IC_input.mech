@@ -1,0 +1,29 @@
+% IC Input
+
+trial = 1
+g_postIC = 0.1; % [uS]
+E_exc = 0; % [mV]
+tauR = 0.5; %[ms]
+tauD = 1.5; %[ms]
+Iapp = 0; %[nA]
+
+ICinput = genICinput(tauR, tauD, dt, trial);
+
+%%%% double exponential function %%%%
+% f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)
+
+netcon=eye(N_pre,N_post);
+IappNetcon=zeros(1,N_post);
+
+%iIC(X,t) = g_postIC .* sum( f( ICinput(max(1,round(t/dt)), :) ) * netcon ).*(E_exc - X);
+%iIC(X,t) = g_postIC .* f(ICinput(max(1,round(t/dt)), :)) * netcon ).*(E_exc - X);
+%iIC(X,t) = g_postIC .* f( ICinput(round(t/dt),:) ) * netcon .* (E_exc - X);
+%iIC(X,t) = g_postIC .* ICinput(round(t/dt),:) * netcon .* (E_exc - X);
+
+iIC(X,t) = g_postIC .* ICinput(ceil((t+dt)/dt),:) * netcon .* (X - E_exc) + Iapp*IappNetcon;
+
+% monitor functions
+
+monitor iIC
+
+@isyn += iIC(X,t)
