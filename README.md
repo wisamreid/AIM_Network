@@ -7,6 +7,7 @@ This project simulates the tuning curves changes of the A1 due to selective atte
 * Selective attention in the spectral domain (Fritz et al., 2003, and Atiani et al., 2009)
 * Functional implications of selective attention in the spatial and spectral domains
 
+## Dependencies
 We used either pure-tones or white gaussian noise to drive the network. Inputs to the simulations are simulated spike trains generated using the [BOSSA algorithm](https://github.com/kfchou/BOSSA).
 
 Functional applications of the AIM network uses speech stimuli from the [CRM corpus](https://github.com/LABSN/expyfun-data/tree/master/crm). In the spatial attention examples, speech stimuli were spatialized with [KEMAR head-related transfer functions](https://github.com/kfchou/BOSSA/tree/master/HRTF_40k).
