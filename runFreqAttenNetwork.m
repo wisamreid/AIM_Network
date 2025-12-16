@@ -33,7 +33,7 @@ s.populations(end).equations = 'chouLIF';
 s.populations(end).size = nCells;
 s.populations(end).parameters = {'noise',0};
 
-s.populations(end+1).name='E';
+s.populations(end+1).name='E'; % TEST
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = nCells;
 s.populations(end).parameters = {'noise',noise};
